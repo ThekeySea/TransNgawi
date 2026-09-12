@@ -4,6 +4,181 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    
+    /* Brand Colors - Bold Core, Quiet Structure */
+    --color-brand-primary: #ff750f;
+    --color-brand-primary-hover: #e56a0e;
+    
+    --color-surface-light: #faf9f8;
+    --color-surface-default: #ffffff;
+    --color-surface-elevated: #ffffff;
+    --color-surface-subtle: #f8f7f6;
+    
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #666666;
+    --color-text-tertiary: #999999;
+    --color-text-on-brand: #ffffff;
+    
+    --color-border-light: #e6e6e6;
+    --color-border-regular: #d1d1d1;
+    --color-border-heavy: #b3b3b3;
+    
+    --color-semantic-success: #10b981;
+    --color-semantic-warning: #f59e0b;
+    --color-semantic-error: #ef4444;
+    --color-semantic-info: #3b82f6;
+}
+
+/* Component Base Styles */
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    white-space: nowrap;
+    border: none;
+}
+
+.button:focus-visible {
+    outline: 2px solid var(--color-brand-primary);
+    outline-offset: 2px;
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.button--primary {
+    background-color: var(--color-brand-primary);
+    color: var(--color-text-on-brand);
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+}
+
+.button--primary:hover:not(:disabled) {
+    background-color: var(--color-brand-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(255, 117, 15, 0.2);
+}
+
+.button--secondary {
+    background-color: transparent;
+    color: var(--color-text-primary);
+    border: 2px solid var(--color-border-regular);
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
+}
+
+.button--secondary:hover:not(:disabled) {
+    border-color: var(--color-border-heavy);
+    background-color: var(--color-surface-subtle);
+}
+
+.button--small {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9375rem;
+}
+
+.button--large {
+    padding: 1.125rem 2.5rem;
+    font-size: 1.125rem;
+}
+
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-label {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+}
+
+.input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid var(--color-border-light);
+    border-radius: 0.75rem;
+    font-family: inherit;
+    font-size: 1rem;
+    background-color: var(--color-surface-default);
+    color: var(--color-text-primary);
+    transition: border-color 0.2s ease;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-brand-primary);
+}
+
+.input:disabled {
+    background-color: var(--color-surface-subtle);
+    cursor: not-allowed;
+}
+
+.card {
+    background-color: var(--color-surface-default);
+    border-radius: 1.25rem;
+    overflow: hidden;
+}
+
+.card--bordered {
+    border: 1px solid var(--color-border-light);
+}
+
+.card--shadow-sm {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.card--shadow-md {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card--shadow-lg {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-badge--success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-semantic-success);
+}
+
+.status-badge--warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--color-semantic-warning);
+}
+
+.status-badge--error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-semantic-error);
+}
+
+.status-badge--info {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--color-semantic-info);
+}
+
+.status-badge--brand {
+    background-color: rgba(255, 117, 15, 0.1);
+    color: var(--color-brand-primary);
 }
