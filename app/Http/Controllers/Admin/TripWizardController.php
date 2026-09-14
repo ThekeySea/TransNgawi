@@ -148,7 +148,13 @@ class TripWizardController extends Controller
         $wizard['rest_stop_address'] = $validated['rest_stop_address'] ?? null;
         $wizard['policy'] = $validated['policy'] ?? null;
 
-        $service->create($wizard);
+        try {
+            $service->create($wizard);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->route('admin.trips.create', ['step' => 5])
+                ->withInput()
+                ->withErrors($e->errors());
+        }
 
         session()->forget(self::SESSION_KEY);
 

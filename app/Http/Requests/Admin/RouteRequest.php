@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use App\Enums\ServiceCategory;
 use App\Models\Location;
+use App\Models\Route;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -55,6 +56,18 @@ class RouteRequest extends FormRequest
                 if (! $origin->is_important || ! $destination->is_important) {
                     $validator->errors()->add('origin_id', 'SATSET hanya boleh memakai rute antar tempat penting (kedua titik harus penting).');
                 }
+            }
+
+            $duplicate = Route::where('origin_id', $this->input('origin_id'))
+                ->where('destination_id', $this->input('destination_id'))
+                ->where('service_category', $service);
+
+            if ($route = $this->route('route')) {
+                $duplicate->where('id', '!=', $route->id);
+            }
+
+            if ($duplicate->exists()) {
+                $validator->errors()->add('origin_id', 'Rute dengan kombinasi asal, tujuan, dan kategori layanan ini sudah ada.');
             }
         });
     }

@@ -14,6 +14,15 @@ class WizardStepFiveRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        foreach (['exterior_photos', 'interior_photos', 'facility_photos'] as $field) {
+            if ($this->has($field) && is_array($this->input($field))) {
+                $this->merge([$field => array_values(array_filter($this->input($field), fn ($v) => filled($v)))]);
+            }
+        }
+    }
+
     public function rules(): array
     {
         return [

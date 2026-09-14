@@ -14,6 +14,15 @@ class TripUpdateRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        foreach (['exterior_photos', 'interior_photos', 'facility_photos'] as $field) {
+            if ($this->has($field) && is_array($this->input($field))) {
+                $this->merge([$field => array_values(array_filter($this->input($field), fn ($v) => filled($v)))]);
+            }
+        }
+    }
+
     public function rules(): array
     {
         $trip = $this->route('trip');
@@ -24,6 +33,14 @@ class TripUpdateRequest extends FormRequest
             'arrives_at' => ['required', 'date', 'after:departs_at'],
             'fares' => ['required', 'array', 'min:1'],
             'fares.*' => ['required', 'integer', 'min:1000', 'max:10000000'],
+            'amenities' => ['nullable', 'array'],
+            'amenities.*' => ['string', 'in:WiFi,Toilet,USB,Selimut,Cemilan,Bantal,Makanan'],
+            'exterior_photos' => ['nullable', 'array', 'max:5'],
+            'exterior_photos.*' => ['url', 'max:500'],
+            'interior_photos' => ['nullable', 'array', 'max:5'],
+            'interior_photos.*' => ['url', 'max:500'],
+            'facility_photos' => ['nullable', 'array', 'max:5'],
+            'facility_photos.*' => ['url', 'max:500'],
         ];
     }
 

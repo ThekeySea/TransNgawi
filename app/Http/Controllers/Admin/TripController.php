@@ -60,6 +60,7 @@ class TripController extends Controller
             'buses' => $buses,
             'allowedClasses' => $allowedClasses,
             'fareMap' => $fareMap,
+            'availableAmenities' => ['WiFi', 'Toilet', 'USB', 'Selimut', 'Cemilan', 'Bantal', 'Makanan'],
         ]);
     }
 
@@ -73,6 +74,10 @@ class TripController extends Controller
                 'bus_id' => $validated['bus_id'],
                 'departs_at' => $validated['departs_at'],
                 'arrives_at' => $validated['arrives_at'],
+                'amenities' => $validated['amenities'] ?? null,
+                'exterior_photos' => $validated['exterior_photos'] ?? null,
+                'interior_photos' => $validated['interior_photos'] ?? null,
+                'facility_photos' => $validated['facility_photos'] ?? null,
             ]);
 
             // Sync fares: delete existing, recreate

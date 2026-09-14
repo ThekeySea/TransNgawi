@@ -5,7 +5,7 @@
 @section('content')
     <div class="container-app max-w-2xl">
         <h1 class="text-3xl font-bold tracking-tight">Buat Trip</h1>
-        <p class="mt-2 text-base text-[#555555]">Langkah {{ $step }} dari 4.</p>
+        <p class="mt-2 text-base text-[#555555]">Langkah {{ $step }} dari 5.</p>
 
         @php
             $steps = [1 => 'Layanan', 2 => 'Rute', 3 => 'Jadwal & Bus', 4 => 'Harga', 5 => 'Detail Trip'];
@@ -19,6 +19,17 @@
         </ol>
 
         <div class="card mt-6 p-6 md:p-8">
+            @if ($errors->any())
+                <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    <p class="font-bold">Terjadi kesalahan:</p>
+                    <ul class="mt-1 list-disc list-inside">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             @if ($step === 1)
                 <form method="POST" action="{{ route('admin.trips.store-step-1') }}">
                     @csrf
@@ -116,7 +127,7 @@
             @endif
 
             @if ($step === 5)
-                <form method="POST" action="{{ route('admin.trips.store-step-5') }}" class="space-y-6">
+                <form method="POST" action="{{ route('admin.trips.store-step-5') }}" class="space-y-6" x-data="{ checkedAmenities: @js(old('amenities', $wizard['amenities'] ?? [])) }">
                     @csrf
 
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -146,8 +157,9 @@
                                 @php
                                     $checked = in_array($amenity, old('amenities', $wizard['amenities'] ?? []));
                                 @endphp
-                                <label class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm cursor-pointer transition-all @if($checked) border-[#ff750f] bg-[#ff750f]/10 text-[#ff750f] @else border-[#e6e6e6] text-[#555555] @endif">
-                                    <input type="checkbox" name="amenities[]" value="{{ $amenity }}" @if($checked) checked @endif class="sr-only" x-data x-effect="$el.closest('label').classList.toggle('border-[#ff750f]', $el.checked); $el.closest('label').classList.toggle('bg-[#ff750f]/10', $el.checked); $el.closest('label').classList.toggle('text-[#ff750f]', $el.checked)">
+                                <label class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm cursor-pointer transition-all"
+                                :class="checkedAmenities.includes('{{ $amenity }}') ? 'border-[#ff750f] bg-[#ff750f]/10 text-[#ff750f]' : 'border-[#e6e6e6] text-[#555555]'">
+                                    <input type="checkbox" name="amenities[]" value="{{ $amenity }}" x-model="checkedAmenities" class="sr-only">
                                     {{ $amenity }}
                                 </label>
                             @endforeach
