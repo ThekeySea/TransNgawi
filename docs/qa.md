@@ -1,3 +1,4 @@
+Markdown
 # TransNgawi QA and Definition of Done
 
 ## 1. Purpose
@@ -32,7 +33,8 @@ Check:
 - database persistence;
 - relationships;
 - error states;
-- transactions for critical operations.
+- transactions for critical operations;
+- admin creation constraints (e.g., system rejects ANTIBU routes if cities are not capitals, rejects invalid bus class configurations).
 
 ## 4. Booking Checklist
 
@@ -44,7 +46,8 @@ Check:
 - fare validated server-side;
 - booking total cannot be trusted from client input;
 - ordinary double-booking race is prevented;
-- booking state transitions are valid.
+- booking state transitions are valid;
+- 15-minute seat hold timer expires correctly and releases seat to `AVAILABLE` if unpaid.
 
 ## 5. Payment Checklist
 
@@ -78,7 +81,9 @@ Check:
 - error;
 - images;
 - navigation;
-- footer.
+- footer;
+- seat map exact capacity (30 or 40 seats) and layout (2-2 or 1-1) renders correctly based on the backend bus model;
+- 15-minute checkout countdown timer is clearly visible to the user during booking.
 
 ## 8. Homepage Checklist
 
@@ -149,54 +154,67 @@ Typical Laravel checks:
 
 ```sh
 php artisan test
-```
-
 Typical frontend build:
 
-```sh
+Bash
 npm run build
 ```
-
 Do not report a command as passed unless it was actually executed.
 
-## 13. Database QA
-
+13. Database QA
 For migrations:
-- inspect migration;
-- run migration in a safe environment;
-- verify schema;
-- verify relationships;
-- verify rollback where appropriate.
+
+inspect migration;
+
+run migration in a safe environment;
+
+verify schema;
+
+verify relationships;
+
+verify rollback where appropriate.
 
 Do not destroy existing data just to make a migration pass.
 
-## 14. Regression QA
-
+14. Regression QA
 After changes to shared components:
-- check all pages that use them.
+
+check all pages that use them.
 
 After changes to booking:
-- check search → results → detail → seat → booking.
+
+check search → results → detail → seat → booking.
 
 After changes to payment:
-- check booking → payment → verification → ticket.
 
-## 15. Visual QA Standard
+check booking → payment → verification → ticket.
 
+15. Visual QA Standard
 Ask:
-- Does this look like TransNgawi?
-- Is the hierarchy obvious?
-- Is there unnecessary decoration?
-- Is there excessive whitespace?
-- Is text too small?
-- Does the component look consistent with existing components?
-- Does mobile feel intentionally designed?
 
-## 16. Reporting
+Does this look like TransNgawi?
 
+Is the hierarchy obvious?
+
+Is there unnecessary decoration?
+
+Is there excessive whitespace?
+
+Is text too small?
+
+Does the component look consistent with existing components?
+
+Does mobile feel intentionally designed?
+
+16. Reporting
 Final QA report should state:
-- checks run;
-- pass/fail;
-- unresolved issues;
-- scope not tested;
-- relevant files changed.
+
+checks run;
+
+pass/fail;
+
+unresolved issues;
+
+scope not tested;
+
+relevant files changed.

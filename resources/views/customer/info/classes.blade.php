@@ -341,4 +341,62 @@
             </div>
         </div>
     </section>
+
+    {{-- Jenis Layanan --}}
+    <section class="bg-[#faf9f8] py-16 md:py-24">
+        <div class="container-app">
+            <div class="mb-12 max-w-2xl">
+                <h2 class="text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">Jenis Layanan</h2>
+                <p class="mt-3 text-base text-[#555555]">Kalau kelas itu soal kenyamanan di dalam bus, layanan itu soal jenis rutenya. Tiga-tiganya bisa dipadukan sama kelas apa pun yang kamu pilih.</p>
+            </div>
+
+            @php
+                $serviceDescriptions = [
+                    'antibu' => 'Rute jarak jauh antarprovinsi atau menuju ibu kota. Buat perjalanan jauh yang butuh duduk nyaman.',
+                    'satset' => 'Menghubungkan tempat-tempat penting — misalnya pelabuhan atau bandara. Yang penting fungsinya, sampai tujuan dengan beres.',
+                    'biasane' => 'Perjalanan reguler antarkota ke kota-kota menengah atau besar, di dalam maupun luar provinsi.',
+                ];
+                $serviceInitials = ['antibu' => 'A', 'satset' => 'S', 'biasane' => 'B'];
+            @endphp
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                @foreach ($serviceTypes as $service)
+                    @php
+                        $serviceRoutes = array_values(array_filter($routes, fn ($r) => $r['category'] === $service['code']));
+                    @endphp
+                    <div class="card flex flex-col overflow-hidden">
+                        <div class="px-6 py-5 md:px-8">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ff750f]/10">
+                                    <span class="text-xl font-bold text-[#ff750f]">{{ $serviceInitials[$service['code']] ?? substr($service['name'], 0, 1) }}</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-[#1a1a1a]">{{ $service['name'] }}</h3>
+                                    <p class="text-xs text-[#555555]">{{ $service['label'] }}</p>
+                                </div>
+                            </div>
+                            <p class="mt-4 text-sm leading-relaxed text-[#555555]">{{ $serviceDescriptions[$service['code']] ?? '' }}</p>
+                        </div>
+                        <div class="mt-auto border-t border-[#e6e6e6] px-6 py-5 md:px-8">
+                            <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-[#555555]">Contoh Rute</p>
+                            @if (count($serviceRoutes) > 0)
+                                <ul class="space-y-2.5">
+                                    @foreach ($serviceRoutes as $route)
+                                        <li class="flex items-center justify-between gap-3">
+                                            <span class="text-sm text-[#1a1a1a]">{{ $route['origin'] }} &rarr; {{ $route['destination'] }}</span>
+                                            <span class="shrink-0 text-xs text-[#999]">{{ $route['duration'] }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p class="text-sm text-[#999]">Belum ada contoh rute.</p>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="mt-6 text-xs text-[#999]">Daftar di atas contoh rute (data prototype), bukan jadwal operasional resmi.</p>
+        </div>
+    </section>
 @endsection

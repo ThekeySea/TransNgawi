@@ -11,6 +11,11 @@ use App\Http\Controllers\Customer\SearchController;
 use App\Http\Controllers\Customer\TicketController;
 use App\Http\Controllers\Customer\TrackController;
 use App\Http\Controllers\Customer\TripController;
+use App\Http\Controllers\Admin\BusController as AdminBusController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\LocationController as AdminLocationController;
+use App\Http\Controllers\Admin\TripController as AdminTripController;
+use App\Http\Controllers\Admin\TripWizardController as AdminTripWizardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,7 +38,7 @@ Route::prefix('booking/{booking}')->name('booking.')->group(function () {
 
 Route::get('/tickets/{code}', [TicketController::class, 'show'])->name('tickets.show');
 
-Route::get('/my-trips', [MyTripsController::class, 'index'])->name('my-trips.index');
+Route::get('/my-trips', [MyTripsController::class, 'index'])->middleware('auth')->name('my-trips.index');
 
 Route::prefix('journeys/{journey}')->name('journeys.')->group(function () {
     Route::get('/', [JourneyController::class, 'show'])->name('show');
@@ -48,7 +53,7 @@ Route::get('/help', [HelpController::class, 'index'])->name('help.index');
 Route::post('/help', [HelpController::class, 'store'])->name('help.store');
 Route::get('/help/{help}', [HelpController::class, 'show'])->name('help.show');
 
-Route::get('/profile', [CustomerProfileController::class, 'index'])->name('profile.index');
+Route::get('/profile', [CustomerProfileController::class, 'index'])->middleware('auth')->name('profile.index');
 
 Route::get('/track', [TrackController::class, 'index'])->name('track.index');
 Route::post('/track', [TrackController::class, 'lookup'])->name('track.lookup');
@@ -56,6 +61,18 @@ Route::post('/track', [TrackController::class, 'lookup'])->name('track.lookup');
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::resource('locations', AdminLocationController::class)->except(['show']);
+    Route::resource('buses', AdminBusController::class)->except(['show']);
+    Route::get('/trips', [AdminTripController::class, 'index'])->name('trips.index');
+    Route::get('/trips/create/{step}', [AdminTripWizardController::class, 'create'])->whereNumber('step')->name('trips.create');
+    Route::post('/trips/create/step-1', [AdminTripWizardController::class, 'storeStepOne'])->name('trips.store-step-1');
+    Route::post('/trips/create/step-2', [AdminTripWizardController::class, 'storeStepTwo'])->name('trips.store-step-2');
+    Route::post('/trips/create/step-3', [AdminTripWizardController::class, 'storeStepThree'])->name('trips.store-step-3');
+    Route::post('/trips/create/step-4', [AdminTripWizardController::class, 'storeStepFour'])->name('trips.store-step-4');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');

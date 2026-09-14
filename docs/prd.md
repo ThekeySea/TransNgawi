@@ -62,10 +62,13 @@ A customer should be able to:
 
 ## 5. Service Categories
 
+**All TransNgawi services operate as "Patas" (Direct) buses.** A trip connects exactly one origin terminal to one destination terminal. Rest stops are exclusively for resting, not for boarding or alighting passengers.
+
 ### ANTIBU — Antar Ibu Kota
 
 Purpose:
 Inter-province/capital-oriented long-distance routes.
+Rule: Origin and destination must be registered capital cities.
 
 Current example routes:
 - Surabaya–Semarang
@@ -80,6 +83,7 @@ These are product examples, not permission to invent additional routes.
 
 Purpose:
 Connect important destinations where utility matters more than city-center branding.
+Rule: Origin and destination must be registered as important points (e.g., airports, seaports, main terminals).
 
 Current examples:
 - Surabaya–Cilegon / Pelabuhan Merak
@@ -89,10 +93,22 @@ Current examples:
 
 Purpose:
 Regular intercity travel to medium/large destinations within or outside the province.
+Rule: Standard registered cities/terminals.
 
 Specific routes must come from configured business data, not invented UI copy.
 
-## 6. Travel Classes
+## 6. Travel Classes & Bus Models
+
+TransNgawi uses strict bus templates. Classes are distributed based on the Bus Model.
+
+**Model BIASANE (Total Capacity: 40 Seats)**
+- **Sukian** (30 seats, 2-2 layout)
+- **SukianPlus** (10 seats, 1-1 layout)
+
+**Model ANTIBU & SATSET (Total Capacity: 30 Seats)**
+- **Sukian** (12 seats, 2-2 layout, front position)
+- **SukianPlus** (10 seats, 1-1 layout, middle position)
+- **SukianPro** (8 seats, 1-1 layout, back position)
 
 ### Sukian
 
@@ -261,10 +277,10 @@ Exact navigation implementation may evolve as pages are implemented, but do not 
 
 Booking flow:
 1. search;
-2. results;
-3. trip detail;
+2. results (filterable by service/class);
+3. trip detail (includes a visual seat map showing distinct shapes/symbols per class);
 4. seat selection;
-5. passenger data;
+5. passenger data (A 15-minute hold timer starts here, users must be notified);
 6. booking creation;
 7. payment instructions/state;
 8. manual verification;
@@ -276,7 +292,7 @@ The backend owns:
 - booking state
 - payment state
 
-Seat selection must handle concurrency safely enough that two customers cannot successfully purchase the same seat through ordinary race conditions.
+Seat selection must handle concurrency safely enough that two customers cannot successfully purchase the same seat through ordinary race conditions. Held seats revert to available if the 15-minute timer expires before payment.
 
 ## 11. Pricing
 
@@ -289,7 +305,7 @@ Conceptual inputs may include:
 - trip
 - configured fare
 
-"Live pricing" means the displayed price should come from current application data rather than hardcoded frontend values.
+"Live pricing" means the displayed price should come from current application data rather than hardcoded frontend values. Admin determines the price dynamically, guided by dashboard recommendations (murah/reguler/mahal).
 
 Do not create a fake external pricing API.
 
@@ -326,7 +342,7 @@ Do not invent fields that have no product or operational purpose.
 
 Customer support model:
 1. customer starts a help session;
-2. admin receives a notification/queue item;
+2. admin receives a notification/queue item (indicated by a notification badge on the Admin Dashboard Beranda);
 3. admin accepts the session;
 4. customer and admin exchange messages;
 5. admin closes the session.
@@ -360,20 +376,13 @@ No real manufacturer API is required in the current MVP unless explicitly reques
 
 ## 17. Admin
 
-Admin dashboard may include:
-- overview;
-- trips;
-- routes;
-- classes;
-- buses;
-- seats;
-- bookings;
-- payments;
-- support;
-- journey status;
-- fleet issues;
-- reports;
-- users/permissions.
+Admin dashboard must include the following strictly structured menus to maintain data integrity:
+- **Beranda**: Summary overview, includes a notification badge for new "Bantuan" sessions.
+- **Rute**: Add cities/terminals/points and flag them (capital, important, regular).
+- **Perjalanan**: Wizard to create trips. System must restrict location options based on selected service (e.g., ANTIBU only shows capital cities).
+- **Bus**: Fleet management. Add/remove buses using explicit templates (Model BIASANE or Model ANTIBU/SATSET). View status (IDLE, ACTIVE, MAINTENANCE).
+- **Transaksi**: View ticket purchase history. Filterable by bus model, service, trip, and recent transactions.
+- **Analisa**: Revenue statistics and ticket sales (weekly/monthly/gross).
 
 Do not implement every module at once. Follow the workflow and current task scope.
 

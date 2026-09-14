@@ -1,0 +1,119 @@
+@extends('layouts.admin')
+
+@section('title', 'Buat Trip')
+
+@section('content')
+    <div class="container-app max-w-2xl">
+        <h1 class="text-3xl font-bold tracking-tight">Buat Trip</h1>
+        <p class="mt-2 text-base text-[#555555]">Langkah {{ $step }} dari 4.</p>
+
+        @php
+            $steps = [1 => 'Layanan', 2 => 'Rute', 3 => 'Jadwal & Bus', 4 => 'Harga'];
+        @endphp
+        <ol class="mt-6 flex flex-wrap gap-2 text-xs font-semibold" aria-label="Langkah pembuatan trip">
+            @foreach ($steps as $number => $label)
+                <li class="rounded-full px-3 py-1.5 @if($number === $step) bg-[#ff750f] text-white @elseif($number < $step) bg-[#ff750f]/15 text-[#ff750f] @else bg-[#e6e6e6] text-[#555555] @endif">
+                    {{ $number }}. {{ $label }}
+                </li>
+            @endforeach
+        </ol>
+
+        <div class="card mt-6 p-6 md:p-8">
+            @if ($step === 1)
+                <form method="POST" action="{{ route('admin.trips.store-step-1') }}">
+                    @csrf
+                    <p class="input-label">Pilih layanan</p>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3" x-data="{ picked: @js(old('service_category', $wizard['service_category'] ?? '')) }">
+                        @foreach ($services as $service)
+                            <label class="cursor-pointer rounded-[var(--radius-sm)] border p-4 transition-all" :class="picked === '{{ $service->value }}' ? 'border-[#ff750f] bg-[#ff750f]/5' : 'border-[#e6e6e6]'">
+                                <input type="radio" name="service_category" value="{{ $service->value }}" x-model="picked" class="h-4 w-4" style="accent-color: #ff750f">
+                                <span class="mt-2 block text-sm font-bold">{{ $service->name }}</span>
+                                <span class="block text-xs text-[#555555]">{{ $service->label() }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('service_category')
+                        <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
+                    @enderror
+                    <div class="mt-6">
+                        <button type="submit" class="btn-primary">Lanjut ke Rute</button>
+                    </div>
+                </form>
+            @endif
+
+            @if ($step === 2)
+                <form method="POST" action="{{ route('admin.trips.store-step-2') }}">
+                    @csrf
+                    <x-ui.select label="Pilih rute" name="route_id" :error="$errors->first('route_id')" required>
+                        <option value="">— Pilih rute —</option>
+                        @foreach ($routes as $route)
+                            <option value="{{ $route->id }}" @selected((int) old('route_id', $wizard['route_id'] ?? 0) === $route->id)>
+                                {{ $route->origin->name }} &rarr; {{ $route->destination->name }}
+                            </option>
+                        @endforeach
+                    </x-ui.select>
+                    <p class="mt-1.5 text-sm text-[#555555]">Hanya rute {{ strtoupper($wizard['service_category']) }} yang lolos aturan lokasi yang ditampilkan.</p>
+                    <div class="mt-6 flex gap-3">
+                        <button type="submit" class="btn-primary">Lanjut ke Jadwal</button>
+                        <a href="{{ route('admin.trips.create', ['step' => 1]) }}" class="btn-secondary">Kembali</a>
+                    </div>
+                </form>
+            @endif
+
+            @if ($step === 3)
+                <form method="POST" action="{{ route('admin.trips.store-step-3') }}">
+                    @csrf
+                    <x-ui.select label="Pilih bus" name="bus_id" :error="$errors->first('bus_id')" required>
+                        <option value="">— Pilih bus —</option>
+                        @foreach ($buses as $bus)
+                            <option value="{{ $bus->id }}" @selected((int) old('bus_id', $wizard['bus_id'] ?? 0) === $bus->id)>
+                                {{ $bus->plate_number }} ({{ $bus->model_type->label() }})
+                            </option>
+                        @endforeach
+                    </x-ui.select>
+                    <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <x-ui.input label="Berangkat" type="datetime-local" name="departs_at" :value="old('departs_at', $wizard['departs_at'] ?? '')" :error="$errors->first('departs_at')" required />
+                        <x-ui.input label="Tiba" type="datetime-local" name="arrives_at" :value="old('arrives_at', $wizard['arrives_at'] ?? '')" :error="$errors->first('arrives_at')" required />
+                    </div>
+                    <div class="mt-6 flex gap-3">
+                        <button type="submit" class="btn-primary">Lanjut ke Harga</button>
+                        <a href="{{ route('admin.trips.create', ['step' => 2]) }}" class="btn-secondary">Kembali</a>
+                    </div>
+                </form>
+            @endif
+
+            @if ($step === 4)
+                <div class="mb-6 rounded-[var(--radius-sm)] bg-[#faf9f8] p-4 text-sm">
+                    <p class="font-bold">{{ $route->origin->name }} &rarr; {{ $route->destination->name }}</p>
+                    <p class="mt-1 text-[#555555]">{{ $bus->plate_number }} ({{ $bus->model_type->label() }}) &middot; {{ $seatCount }} kursi digenerate otomatis</p>
+                </div>
+                <form method="POST" action="{{ route('admin.trips.store-step-4') }}">
+                    @csrf
+                    <p class="input-label">Harga per kelas (Rp)</p>
+                    <div class="space-y-4">
+                        @foreach ($allowedClasses as $class)
+                            <x-ui.input
+                                :label="$class"
+                                type="number"
+                                :name="'fares['.$class.']'"
+                                :value="old('fares.'.$class, $wizard['fares'][$class] ?? '')"
+                                :error="$errors->first('fares.'.$class)"
+                                min="1000"
+                                step="500"
+                                placeholder="mis. 195000"
+                                required
+                            />
+                        @endforeach
+                    </div>
+                    @error('fares')
+                        <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
+                    @enderror
+                    <div class="mt-6 flex gap-3">
+                        <button type="submit" class="btn-primary">Buat Trip</button>
+                        <a href="{{ route('admin.trips.create', ['step' => 3]) }}" class="btn-secondary">Kembali</a>
+                    </div>
+                </form>
+            @endif
+        </div>
+    </div>
+@endsection

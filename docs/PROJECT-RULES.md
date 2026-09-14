@@ -84,7 +84,17 @@ Examples:
 - availability;
 - booking validity;
 - payment state;
-- permissions.
+- permissions;
+- 15-minute seat hold logic.
+
+**Admin Constraint Rules:**
+Admin has full control over data operations, but the system must enforce business logic to prevent illogical inputs:
+- System must reject an ANTIBU trip creation if the selected locations are not capital cities.
+- System must reject a SATSET trip creation if the selected locations are not important points.
+- System must reject adding classes to a bus model that does not support them (e.g., adding SukianPro to a BIASANE model).
+
+**Pricing Guidelines:**
+Admin defines the manual fare for trips. The backend/dashboard provides visual guidance (murah/reguler/mahal) to help the Admin decide, but the database remains the absolute authority on the final price.
 
 ## 9. UI Consistency
 

@@ -1,3 +1,4 @@
+Markdown
 ---
 name: transngawi-ui-design
 description: Gunakan saat membuat, mengubah, memperbaiki, atau menilai elemen UI/UX TransNgawi. Menjadi aturan desain utama untuk layout, typography, warna, spacing, cards, buttons, forms, booking, route, ticket, navigation, admin UI, imagery, motion, responsive behavior, accessibility, performance, dan visual QA.
@@ -117,46 +118,43 @@ Gunakan skala:
 
 ```text
 4 8 12 16 20 24 32 40 48 64 80 96 120
-```
-
 Default:
-- 4–8: micro/icon spacing
-- 12–16: control/card internals
-- 20–24: component spacing
-- 32–48: component groups
-- 64–96: section spacing
-- 120+: exceptional hero composition
+
+4–8: micro/icon spacing
+
+12–16: control/card internals
+
+20–24: component spacing
+
+32–48: component groups
+
+64–96: section spacing
+
+120+: exceptional hero composition
 
 Hindari angka acak seperti 37px/53px kecuali ada alasan layout yang kuat.
 
-### Container
+Container
+Target desktop 1200–1280px; gunakan responsive horizontal padding. Prinsip awal: mobile 20–24px, tablet 32px, desktop 40–64px.
 
-Target desktop `1200–1280px`; gunakan responsive horizontal padding. Prinsip awal: mobile 20–24px, tablet 32px, desktop 40–64px.
-
-### Radius
-
-```text
+Radius
+Plaintext
 small   8px
 medium  12–16px
 large   20–24px
 pill    999px
-```
-
-### Color
-
+Color
 Orange adalah primary brand/CTA, bukan warna seluruh halaman. Gunakan untuk primary CTA, active/selected state, key highlight, progress, dan brand moments.
 
 Neutral surfaces harus menjadi mayoritas. Success/warning/error/info harus semantic dan tidak semuanya orange.
 
-### Shadow
-
+Shadow
 Gunakan elevation untuk hierarchy, bukan dekorasi. Small untuk controls/compact cards, medium untuk cards/panels/popovers, strong hanya untuk modal/hero media yang benar-benar membutuhkan separation. Hindari colored glow.
 
-## 5. Typography
-
+5. Typography
 Hierarchy minimum:
 
-```text
+Plaintext
 Display / Hero
 H1
 H2
@@ -165,45 +163,46 @@ Body
 Small
 Label
 Utility
-```
-
 Rules:
-- H1 adalah focal point.
-- Body harus nyaman dibaca.
-- Label form harus jelas.
-- Utility text boleh kecil tetapi tetap readable.
-- Hindari uppercase seluruh interface dan letter-spacing ekstrem.
-- Maksimal 1 display family + 1 body/UI family jika font baru memang diperlukan.
-- Jika existing project sudah punya font system, pertahankan.
-- Batasi body text sekitar 45–75 karakter/baris jika memungkinkan.
 
-## 6. Layout & Grid
+H1 adalah focal point.
 
+Body harus nyaman dibaca.
+
+Label form harus jelas.
+
+Utility text boleh kecil tetapi tetap readable.
+
+Hindari uppercase seluruh interface dan letter-spacing ekstrem.
+
+Maksimal 1 display family + 1 body/UI family jika font baru memang diperlukan.
+
+Jika existing project sudah punya font system, pertahankan.
+
+Batasi body text sekitar 45–75 karakter/baris jika memungkinkan.
+
+6. Layout & Grid
 Gunakan 12-column grid untuk halaman kompleks, 6/8-column untuk composition sederhana, flex untuk control rows, grid untuk repeated cards.
 
 Mobile bukan desktop yang diperkecil. Mobile harus menyederhanakan hierarchy, mengubah row menjadi column bila perlu, menjaga touch target, dan mempertahankan CTA.
 
 Negative space dipakai untuk grouping. Jangan mengisi ruang kosong hanya agar penuh, tetapi jangan membuat whitespace sampai hubungan konten hilang.
 
-## 7. Visual Hierarchy
-
+7. Visual Hierarchy
 Setiap layar idealnya punya:
 
-```text
+Plaintext
 1 primary focal point
 1 primary action
 supporting information
 secondary actions
 background/decorative layer
-```
-
 Gunakan size, weight, contrast, position, spacing, dan color secara terukur. Jangan membuat semuanya bold untuk menciptakan hierarchy.
 
-## 8. Navigation
-
+8. Navigation
 Primary navigation TransNgawi:
 
-```text
+Plaintext
 Perjalanan
 Kelas
 Rute
@@ -211,42 +210,41 @@ Bantuan
 Lacak Tiket
 Masuk
 Cari Tiket
-```
-
-`Cari Tiket` adalah prominent CTA.
+Cari Tiket adalah prominent CTA.
 
 Desktop: brand kiri, nav teratur, CTA jelas. Mobile: compact navigation/drawer yang accessible; jangan memaksa seluruh menu tampil.
 
 Navbar boleh shrink saat scroll jika meningkatkan usability. Jangan membuat transisinya dramatis.
 
-## 9. Hero
-
+9. Hero
 Hero adalah authored moment terkuat.
 
 Homepage:
-- full-bleed bus photography
-- text langsung di atas image
-- tidak ada dashboard/search card besar di dalam hero
-- headline + supporting copy + CTA
-- overlay hanya untuk readability
+
+full-bleed bus photography
+
+text langsung di atas image
+
+tidak ada dashboard/search card besar di dalam hero
+
+headline + supporting copy + CTA
+
+overlay hanya untuk readability
 
 Hierarchy:
 
-```text
+Plaintext
 image
 → tonal overlay
 → headline
 → supporting copy
 → CTA
-```
-
 Image harus terasa sebagai stage: deliberate crop, strong focal subject, responsive object-position, readable overlay.
 
-## 10. Quick Booking Widget
-
+10. Quick Booking Widget
 Booking adalah core product UI.
 
-```text
+Plaintext
 Pesan Tiket Cepat
 Service Type
 Dari
@@ -254,148 +252,142 @@ Ke
 Tanggal Berangkat
 Penumpang
 Cari Perjalanan
-```
-
 Service types:
 
-```text
+Plaintext
 ANTIBU
 SATSET
 BIASANE
-```
-
 Rules:
-- service type harus prominent
-- origin/destination mudah dibedakan
-- date picker jelas
-- passenger control bukan text input biasa
-- primary action paling mudah ditemukan
-- validation inline dan spesifik
 
-### Overlap
+service type harus prominent
 
+origin/destination mudah dibedakan
+
+date picker jelas
+
+passenger control bukan text input biasa
+
+primary action paling mudah ditemukan
+
+validation inline dan spesifik
+
+Overlap
 Jika widget overlap hero/section berikutnya:
-- buat stacking context yang jelas
-- parent positioning harus jelas
-- z-index harus kecil dan bermakna
-- jangan gunakan `999999`
-- reserve vertical space di section berikutnya
+
+buat stacking context yang jelas
+
+parent positioning harus jelas
+
+z-index harus kecil dan bermakna
+
+jangan gunakan 999999
+
+reserve vertical space di section berikutnya
 
 Overlap adalah compositional technique, bukan bug fix.
 
 Mobile: horizontal form berubah menjadi vertical flow; jangan mempertahankan row dengan field terlalu sempit.
 
-## 11. Buttons
-
+11. Buttons
 Hierarchy:
 
-```text
+Plaintext
 Primary
 Secondary
 Tertiary/Text
 Destructive
-```
-
 Primary orange untuk aksi utama seperti Cari Tiket, Lanjutkan, Konfirmasi, Bayar, Simpan.
 
 Hover boleh memakai background shift, slight lift, border/shadow change, atau icon movement kecil. Press cukup subtle.
 
 Disabled harus jelas tidak actionable tanpa membuat teks tidak terbaca.
 
-## 12. Forms
-
+12. Forms
 Anatomy:
 
-```text
+Plaintext
 label
 control
 helper/error
-```
-
 Input harus punya tinggi/padding konsisten, border jelas, focus state jelas, dan label nyata. Placeholder bukan pengganti label.
 
 Jangan menghapus focus outline tanpa replacement. Error harus dekat field, spesifik, singkat, dan actionable.
 
-## 13. Cards
-
+13. Cards
 Card hanya dipakai jika konten memang merupakan unit mandiri.
 
 Anatomy dapat berupa:
 
-```text
+Plaintext
 media/icon
 label bila semantik
  title
 supporting content
 metadata
 action
-```
-
 Jangan membuat decorative eyebrow hanya untuk gaya. Card yang tidak actionable jangan dibuat terlihat clickable.
 
-## 14. Route Cards
-
+14. Route Cards
 Prioritaskan:
 
-```text
+Plaintext
 origin → destination
 date/time
 class
 fare
 availability/status
 CTA
-```
-
 Route visualization harus membantu scanning, bukan menjadi dekorasi. State tetap harus terbaca tanpa animation.
 
-## 15. Class Cards
+15. Class Cards
+Sukian
+free snack
 
-### Sukian
-- free snack
-- bottled water
+bottled water
 
-### SukianPlus
-- wider seat
-- massage feature
-- free snack
-- bottled water
-- souvenir keychain
+SukianPlus
+wider seat
 
-### SukianPro
-- compact sleeper cabin
-- personal TV
+massage feature
+
+free snack
+
+bottled water
+
+souvenir keychain
+
+SukianPro
+compact sleeper cabin
+
+personal TV
 
 Tunjukkan value difference dengan hierarchy. Jangan memakai klaim absolut seperti "termurah" tanpa data.
 
-## 16. Pricing
-
+16. Pricing
 Harga adalah core conversion information.
 
 Harus konsisten, mudah dipindai, tidak ambigu, dan menyatakan unit bila diperlukan.
 
 Jika harga dipengaruhi route/date/class/seat/occupancy/demand, UI harus jujur. Jangan menyebut fake pricing sebagai live/real-time.
 
-## 17. Seat Selection
-
+17. Seat Selection
 Seat map adalah functional UI.
 
 Minimal state:
 
-```text
-available
+Plaintext
+available (contoh: Hijau)
 selected
 occupied
-unavailable
+unavailable / held (contoh: Merah / Abu-abu, mengindikasikan status ditahan selama 15 menit saat checkout)
 special/accessibility jika didukung
-```
+State tidak boleh hanya dibedakan dengan warna. Setiap kelas (Sukian, SukianPlus, SukianPro) harus direpresentasikan dengan bentuk atau simbol kursi yang berbeda agar pengguna mudah membedakannya secara langsung. Layout kursi wajib mengikuti respons backend (misalnya 2-2 dan 1-1) sesuai kapasitas total 40 atau 30 kursi. Legend harus jelas, seat number terbaca, touch target memadai, dan mobile mudah dioperasikan.
 
-State tidak boleh hanya dibedakan dengan warna. Legend harus jelas, seat number terbaca, touch target memadai, dan mobile mudah dioperasikan.
-
-## 18. Booking Summary & E-ticket
-
+18. Booking Summary & E-ticket
 Booking summary memprioritaskan:
 
-```text
+Plaintext
 route
 date/time
 class
@@ -405,17 +397,14 @@ fare
 fees jika ada
 total
 primary action
-```
-
 Total paling menonjol. Jangan menyembunyikan biaya yang sudah diketahui.
 
 E-ticket memprioritaskan booking code, passenger, route, departure, seat, class, status, dan important instruction. Branded boleh, tetapi readability selalu lebih penting.
 
-## 19. Tracking
-
+19. Tracking
 Bedakan status:
 
-```text
+Plaintext
 scheduled
 boarding
 departed
@@ -424,45 +413,50 @@ approaching
 arrived
 cancelled
 delayed
-```
-
 Jangan menampilkan fake GPS sebagai data nyata. Jika simulated/demo, labeli dengan jujur.
 
-## 20. Help / Support
-
+20. Help / Support
 Flow:
 
-```text
+Plaintext
 Start Help Session
 → waiting
 → admin accepted
 → conversation
 → closed
-```
-
 Chat harus membedakan customer/admin, memiliki timestamp yang readable, input ergonomis, session status, dan loading state.
 
 Admin help UI boleh three-pane:
 
-```text
+Plaintext
 session queue | active conversation | customer/session context
-```
-
-## 21. Admin UI
-
+21. Admin UI
 Admin lebih information-dense daripada customer UI, tetapi tetap memakai typography, color semantics, spacing, button logic, dan accessibility yang sama.
+
+Struktur menu dasbor Admin dibatasi dengan tegas:
+
+Beranda: Menampilkan ringkasan dan badge notifikasi jumlah permintaan sesi Bantuan yang masuk.
+
+Rute: Menambahkan titik lokasi (kota/terminal).
+
+Perjalanan: Membuat jadwal perjalanan.
+
+Bus: Manajemen armada sesuai templat model bus (BIASANE atau ANTIBU/SATSET).
+
+Transaksi: Melihat riwayat pembelian tiket dengan filter.
+
+Analisa: Statistik tiket terjual dan pendapatan harian/bulanan.
 
 Gunakan table untuk data dense. Gunakan cards untuk summary. Gunakan charts hanya jika menjawab pertanyaan bisnis nyata.
 
-## 22. Tables & Status
-
+22. Tables & Status
 Table cocok untuk bookings, passengers, trips, payments, issues, support sessions, buses.
 
 Status badge harus semantic, readable, dan tidak bergantung pada warna saja.
 
 Contoh status:
 
-```text
+Plaintext
 Confirmed
 Pending
 Paid
@@ -472,59 +466,55 @@ Delayed
 Resolved
 Open
 Closed
-```
-
-## 23. Modal, Dropdown, Date Picker
-
+23. Modal, Dropdown, Date Picker
 Modal hanya untuk focused task, confirmation, warning, atau compact detail. Harus responsive, focus-aware, dan dapat ditutup dengan Escape jika sesuai.
 
 Dropdown/select/date picker wajib memiliki selected, active, focus, keyboard behavior, dan loading/empty/error state jika async.
 
 Untuk banyak kota/rute, gunakan searchable select.
 
-## 24. Icons
-
+24. Icons
 Satu visual language. Icon mendukung label. Icon-only control wajib punya accessible name. Jangan mencampur outline/filled/3D/emoji icon secara sembarangan.
 
-## 25. Imagery
-
+25. Imagery
 Prioritaskan bus, perjalanan, interior, seat experience, road/travel context, dan human context yang relevan.
 
 Jangan memakai image random, watermark, fake partner/customer imagery, atau foto yang menyiratkan klaim palsu.
 
 Gunakan crop/object-position yang disengaja dan alt text.
 
-## 26. Decoration & Blur
-
+26. Decoration & Blur
 Dekorasi yang boleh: line, subtle grid, route line, accent marker, image framing, controlled overlap, subtle texture.
 
 Hindari blob gradient everywhere, neon, particles, ornamental bento, pseudo-dashboard, dan meaningless counters.
 
-Blur adalah depth tool. Gunakan hanya jika membantu readability/depth/edge treatment. Jangan blur seluruh page atau text. Decorative blur harus `pointer-events:none` dan tidak berlebihan karena GPU cost.
+Blur adalah depth tool. Gunakan hanya jika membantu readability/depth/edge treatment. Jangan blur seluruh page atau text. Decorative blur harus pointer-events:none dan tidak berlebihan karena GPU cost.
 
-## 27. Motion System
-
+27. Motion System
 Motion harus melayani salah satu:
-1. hierarchy
-2. feedback
-3. attention
-4. continuity
-5. polish
+
+hierarchy
+
+feedback
+
+attention
+
+continuity
+
+polish
 
 Jika tidak, hapus.
 
 Defaults:
 
-```text
+Plaintext
 micro hover/press  120–200ms
 UI state           180–260ms
 popover/toast      220–320ms
 section entrance   400–800ms
 hero sequence      800–1600ms
 stagger            40–90ms
-```
-
-Utamakan `transform` dan `opacity`. Hindari animasi layout-heavy seperti width/height/top/left jika tidak perlu.
+Utamakan transform dan opacity. Hindari animasi layout-heavy seperti width/height/top/left jika tidak perlu.
 
 Hover default: lift ringan 2–4px + subtle shadow/border/background shift.
 
@@ -532,278 +522,322 @@ Scroll reveal: trigger sekitar 20–30% visible, animasikan sekali, jangan repla
 
 Wajib dukung:
 
-```css
+CSS
 @media (prefers-reduced-motion: reduce)
-```
-
 Saat reduced motion: content tetap visible, kurangi transform, nonaktifkan scroll-scrub/pin dan looping non-essential.
 
-## 28. GSAP / WebGL
-
+28. GSAP / WebGL
 GSAP hanya jika CSS/vanilla tidak cukup. Gunakan satu motion architecture dan cleanup lifecycle.
 
 WebGL/Three.js bukan default. Untuk booking/high-intent pages:
 
-> conversion clarity > WebGL spectacle
+conversion clarity > WebGL spectacle
 
 Jika digunakan: static/mobile fallback, reduced-motion policy, capped DPR, bounded render cost, resource disposal, dan jangan menutupi CTA.
 
-## 29. Accessibility
-
+29. Accessibility
 Minimum:
-- semantic HTML
-- keyboard navigation
-- visible focus
-- correct heading hierarchy
-- form labels
-- accessible names
-- sufficient contrast
-- alt text
-- status tidak hanya melalui color
-- reduced motion
-- touch target memadai
 
-Gunakan `button` untuk action dan `a` untuk navigation. Jangan menghapus focus.
+semantic HTML
 
-## 30. Responsive Validation
+keyboard navigation
 
+visible focus
+
+correct heading hierarchy
+
+form labels
+
+accessible names
+
+sufficient contrast
+
+alt text
+
+status tidak hanya melalui color
+
+reduced motion
+
+touch target memadai
+
+Gunakan button untuk action dan a untuk navigation. Jangan menghapus focus.
+
+30. Responsive Validation
 Validasi minimal:
 
-```text
+Plaintext
 375 390 414 768 1024 1280 1440
-```
-
 Periksa overflow, wrapping, CTA reachability, navigation, form stacking, image crop, card width, spacing, table behavior, dan modal behavior.
 
-## 31. Loading / Empty / Error
-
+31. Loading / Empty / Error
 Loading harus mempertahankan layout: skeleton, compact spinner, disabled submit, atau progress indicator.
 
 Empty state menjawab: apa yang kosong, kenapa, dan apa yang dapat dilakukan.
 
 Error harus specific, actionable, dan dekat sumbernya. Bedakan validation, network, server, permission, not-found, dan business-rule errors. Jangan semua menjadi "Something went wrong."
 
-## 32. Homepage Contract
-
+32. Homepage Contract
 Homepage hanya memiliki:
 
-1. Hero
-2. Quick Booking Widget sebagai functional overlap element
-3. Hal Yang Perlu Diperhatikan
-4. About CTA
-5. Footer
+Hero
+
+Quick Booking Widget sebagai functional overlap element
+
+Hal Yang Perlu Diperhatikan
+
+About CTA
+
+Footer
 
 Quick Booking Widget bukan marketing section.
 
-### Hero copy
-
+Hero copy
 Headline:
 
-> Perjalanan Nyaman, Tanpa Bikin Kantong Berat.
+Perjalanan Nyaman, Tanpa Bikin Kantong Berat.
 
 Subhead:
 
-> Pesan tiket bus TransNgawi dengan mudah, pilih perjalanan yang sesuai kebutuhan, dan nikmati perjalanan antarkota dengan kenyamanan yang lebih masuk akal.
+Pesan tiket bus TransNgawi dengan mudah, pilih perjalanan yang sesuai kebutuhan, dan nikmati perjalanan antarkota dengan kenyamanan yang lebih masuk akal.
 
 CTA:
 
-> Cari Tiket
+Cari Tiket
 
-### Hal Yang Perlu Diperhatikan
-
+Hal Yang Perlu Diperhatikan
 Cards:
-- Tiket & Identitas
-- Waktu Keberangkatan
-- Bagasi & Barang Bawaan
-- Informasi Perjalanan
 
-### About CTA
+Tiket & Identitas
 
+Waktu Keberangkatan
+
+Bagasi & Barang Bawaan
+
+Informasi Perjalanan
+
+About CTA
 Heading:
 
-> Kenal Lebih Dekat dengan TransNgawi
+Kenal Lebih Dekat dengan TransNgawi
 
 Description:
 
-> TransNgawi hadir untuk menghadirkan perjalanan antarkota yang nyaman, mudah dipesan, dan tetap masuk akal untuk kebutuhan perjalanan sehari-hari.
+TransNgawi hadir untuk menghadirkan perjalanan antarkota yang nyaman, mudah dipesan, dan tetap masuk akal untuk kebutuhan perjalanan sehari-hari.
 
 CTA:
 
-> Tentang TransNgawi
+Tentang TransNgawi
 
 Desktop: image kiri, content kanan. Mobile: image atas, content bawah.
 
 Footer dark.
 
-## 33. Page-Level Section Rule
-
+33. Page-Level Section Rule
 Sebelum membuat section, jawab:
 
-```text
+Plaintext
 Apa tujuan section ini?
 Informasi apa yang disampaikan?
 Apa action yang diharapkan?
 Kenapa section ini diperlukan?
-```
-
 Jika tidak ada jawaban kuat, jangan buat section.
 
-## 34. Copy Rules
-
+34. Copy Rules
 Copy harus jelas, singkat, human, confident, dan tidak overclaim.
 
 Hindari klaim seperti "terbaik", "nomor satu", "paling murah", atau "paling nyaman" tanpa bukti.
 
 CTA sebaiknya spesifik:
 
-```text
+Plaintext
 Cari Tiket
 Lihat Rute
 Pilih Perjalanan
 Lanjutkan
 Lacak Tiket
 Hubungi Bantuan
-```
-
-## 35. Reference Handling
-
+35. Reference Handling
 Jika user memberi screenshot/website reference:
-1. Analisis reference secara menyeluruh.
-2. Ambil high-level traits: hierarchy, pacing, contrast, image treatment, typography relationship, interaction principles.
-3. Jangan menyalin logo, identity, copy, source code, exact composition, atau proprietary assets.
-4. Bangun identity TransNgawi sendiri.
+
+Analisis reference secara menyeluruh.
+
+Ambil high-level traits: hierarchy, pacing, contrast, image treatment, typography relationship, interaction principles.
+
+Jangan menyalin logo, identity, copy, source code, exact composition, atau proprietary assets.
+
+Bangun identity TransNgawi sendiri.
 
 Reference adalah art direction input, bukan template tracing.
 
-## 36. Element Creation Protocol
-
+36. Element Creation Protocol
 Untuk setiap elemen baru:
 
-### A. Purpose
+A. Purpose
 Apa fungsi elemen?
 
-### B. Priority
+B. Priority
 Primary / Secondary / Supporting / Decorative.
 
-### C. Anatomy
+C. Anatomy
 Tentukan struktur internal.
 
-### D. Visual
+D. Visual
 Tentukan typography, surface, spacing, border, shadow, color, imagery.
 
-### E. States
+E. States
 Normal, hover, focus, active, selected, disabled, loading, error, empty bila relevan.
 
-### F. Responsive
+F. Responsive
 Tentukan mobile/tablet/desktop behavior.
 
-### G. Motion
+G. Motion
 Tentukan apakah motion benar-benar dibutuhkan.
 
-### H. Accessibility
+H. Accessibility
 Semantic element, keyboard behavior, focus, accessible name, contrast.
 
-### I. Validation
+I. Validation
 Uji viewport dan state yang relevan.
 
-## 37. Anti-Pattern Audit
-
+37. Anti-Pattern Audit
 Sebelum handoff, cari:
 
-- excessive gradients
-- excessive glass
-- excessive shadows
-- inconsistent radius
-- inconsistent spacing
-- tiny text
-- oversized headings
-- repeated decorative elements
-- random icon styles
-- fake content/data/claims
-- dead buttons
-- missing hover/focus
-- missing mobile behavior
-- horizontal overflow
-- purposeless animation
-- excessive z-index
-- unnecessary dependencies
-- duplicate component patterns
+excessive gradients
 
-## 38. Visual QA
+excessive glass
 
-### Structure
-- [ ] hierarchy obvious
-- [ ] primary action obvious
-- [ ] section order logical
-- [ ] spacing consistent
+excessive shadows
 
-### Typography
-- [ ] H1 strongest
-- [ ] body readable
-- [ ] labels clear
-- [ ] no accidental tiny text
+inconsistent radius
 
-### Components
-- [ ] buttons consistent
-- [ ] inputs consistent
-- [ ] cards consistent
-- [ ] badges consistent
-- [ ] states complete
+inconsistent spacing
 
-### Brand
-- [ ] orange selective
-- [ ] TransNgawi identity visible
-- [ ] not generic SaaS
-- [ ] not luxury
-- [ ] not KAI clone
+tiny text
 
-### Responsive
-- [ ] 375
-- [ ] 390
-- [ ] 414
-- [ ] 768
-- [ ] 1024
-- [ ] 1280
-- [ ] 1440
-- [ ] no horizontal overflow
+oversized headings
 
-### Accessibility
-- [ ] keyboard
-- [ ] focus
-- [ ] labels
-- [ ] contrast
-- [ ] alt
-- [ ] reduced motion
+repeated decorative elements
 
-### Performance
-- [ ] images optimized
-- [ ] below-fold media lazy loaded where appropriate
-- [ ] no unnecessary animation loops
-- [ ] no heavy WebGL without justification
-- [ ] no layout thrashing
+random icon styles
 
-## 39. Completion Gate
+fake content/data/claims
 
+dead buttons
+
+missing hover/focus
+
+missing mobile behavior
+
+horizontal overflow
+
+purposeless animation
+
+excessive z-index
+
+unnecessary dependencies
+
+duplicate component patterns
+
+38. Visual QA
+Structure
+[ ] hierarchy obvious
+
+[ ] primary action obvious
+
+[ ] section order logical
+
+[ ] spacing consistent
+
+Typography
+[ ] H1 strongest
+
+[ ] body readable
+
+[ ] labels clear
+
+[ ] no accidental tiny text
+
+Components
+[ ] buttons consistent
+
+[ ] inputs consistent
+
+[ ] cards consistent
+
+[ ] badges consistent
+
+[ ] states complete
+
+Brand
+[ ] orange selective
+
+[ ] TransNgawi identity visible
+
+[ ] not generic SaaS
+
+[ ] not luxury
+
+[ ] not KAI clone
+
+Responsive
+[ ] 375
+
+[ ] 390
+
+[ ] 414
+
+[ ] 768
+
+[ ] 1024
+
+[ ] 1280
+
+[ ] 1440
+
+[ ] no horizontal overflow
+
+Accessibility
+[ ] keyboard
+
+[ ] focus
+
+[ ] labels
+
+[ ] contrast
+
+[ ] alt
+
+[ ] reduced motion
+
+Performance
+[ ] images optimized
+
+[ ] below-fold media lazy loaded where appropriate
+
+[ ] no unnecessary animation loops
+
+[ ] no heavy WebGL without justification
+
+[ ] no layout thrashing
+
+39. Completion Gate
 Build/test success alone tidak berarti UI selesai.
 
 Definition of Done:
 
-```text
+Plaintext
 technical correctness
 + visual correctness
 + responsive correctness
 + interaction correctness
 + accessibility
-```
+40. Final Decision Rules
+Jika ragu antara lebih banyak visual vs lebih jelas → lebih jelas.
 
-## 40. Final Decision Rules
+Jika ragu membuat pattern baru vs reuse → reuse.
 
-Jika ragu antara lebih banyak visual vs lebih jelas → **lebih jelas**.
+Jika ragu banyak animation vs sedikit bermakna → sedikit bermakna.
 
-Jika ragu membuat pattern baru vs reuse → **reuse**.
-
-Jika ragu banyak animation vs sedikit bermakna → **sedikit bermakna**.
-
-Jika ragu wow effect vs booking usability → **booking usability**.
+Jika ragu wow effect vs booking usability → booking usability.
 
 TransNgawi harus terlihat seperti satu produk yang dirancang oleh satu design team, bukan kumpulan komponen yang dibuat satu per satu oleh AI.

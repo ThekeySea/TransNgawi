@@ -38,16 +38,17 @@ Conceptual entities:
 - ClassFacility
 
 ### Fleet
-- Bus
-- Seat
+- Bus (includes `model_type` for BIASANE or ANTIBU_SATSET, and `status` for IDLE, ACTIVE, MAINTENANCE)
+- Seat (utilizing predefined templates mapping to 40 or 30 total seats based on model)
 - BusIssue
 - MaintenanceRecord
 
 ### Operations
+- Location (includes boolean flags for `is_capital` and `is_important` to enforce routing rules)
 - Trip
 - TripStop
 - TripFare
-- TripSeat
+- TripSeat (inventory statuses: `AVAILABLE`, `HELD`, `SOLD`, `BLOCKED`)
 
 ### Commerce
 - Booking
@@ -89,11 +90,12 @@ Bus:
 - can have BusIssues and MaintenanceRecords
 
 Trip:
+- 1 Trip = 1 Bus + 1 Origin Location + 1 Destination Location
 - belongs to Route
 - uses a Bus
 - has one or more TripFares
 - has TripSeats
-- may have TripStops
+- may have TripStops (used exclusively for rest stops, not for passenger boarding/alighting)
 
 TripFare:
 - belongs to Trip
@@ -102,7 +104,7 @@ TripFare:
 TripSeat:
 - belongs to Trip
 - references a Seat
-- carries availability state where required
+- carries availability state (`AVAILABLE`, `HELD`, `SOLD`, `BLOCKED`) where required
 
 Booking:
 - belongs to a customer/user context as appropriate
@@ -143,12 +145,12 @@ Seat availability is not controlled by the frontend.
 The backend must:
 1. validate the trip;
 2. validate the requested seats;
-3. verify current availability;
-4. create/update booking records transactionally;
-5. prevent ordinary double-booking races;
-6. return an authoritative result.
-
-Use appropriate database transactions and locking/unique constraints where needed.
+3. verify current availability (`AVAILABLE` state);
+4. update state to `HELD` and start a 15-minute expiration timer;
+5. create/update booking records transactionally;
+6. prevent ordinary double-booking races using database locks/constraints;
+7. return an authoritative result;
+8. revert `HELD` seats to `AVAILABLE` if the 15-minute timer expires without payment confirmation.
 
 Do not rely on JavaScript-only checks.
 
@@ -188,7 +190,7 @@ Support session lifecycle:
 - active
 - closed
 
-Notification is created when a new customer session requires admin attention.
+Notification is created when a new customer session requires admin attention (to be displayed as a notification badge on the admin dashboard).
 
 Messages should belong to a session and have clear sender identity/type.
 
@@ -235,7 +237,7 @@ Typical responsibilities:
 - call domain/application logic;
 - return response.
 
-Complex operations such as booking creation may use dedicated service/action classes.
+Complex operations such as booking creation (handling the 15-minute hold logic) or the admin trip creation wizard may use dedicated service/action classes.
 
 Do not create service classes solely to wrap trivial Eloquent calls.
 
@@ -338,7 +340,7 @@ Before migration changes:
 
 ## 18. Architecture Evolution
 
-The architecture should evolve from actual requirements.
+TransNgawi's architecture should evolve from actual requirements.
 
 Do not prematurely introduce:
 - microservices;
@@ -349,3 +351,29 @@ Do not prematurely introduce:
 - complex state machines without need.
 
 Complexity must have a concrete reason.
+
+## 19. Admin Trip Wizard (implemented)
+
+Admin trip creation (`/admin/trips/create`, 4 steps) is the single backend
+enforcer for catalog rules from PROJECT-RULES §8:
+
+- Step 1 (service) → Step 2 (route) → Step 3 (date/bus) → Step 4 (pricing).
+- Wizard state lives in session; each step is backend-validated and steps
+  cannot be skipped. Final creation re-validates everything inside a
+  transaction (`App\Services\TripCreationService`).
+- Location rules: ANTIBU requires both endpoint `is_capital`; SATSET requires
+  both endpoint `is_important`; BIASANE unrestricted. `Route::forService()`
+  applies the same filter for dropdown convenience, but the service is
+  authoritative on submit.
+- Seat templates (`App\Support\BusSeatTemplate`, v1):
+  - BIASANE: 40 seats (rows A–J × cols 1–4; A–B SukianPlus, C–J Sukian).
+  - ANTIBU_SATSET: 30 seats (rows A–J × cols 1–3; A–C SukianPro,
+    D–F SukianPlus, G–J Sukian).
+- Pricing step must supply fares for exactly the template's class set, so
+  SukianPro can never be sold on a BIASANE bus and every generated seat has
+  a matching fare. Fares are integers (IDR), min Rp1.000.
+
+Open ambiguity (not decided): `buses.status` vocabulary differs between this
+document (IDLE/ACTIVE/MAINTENANCE) and AGENTS.md §26 (Available/Assigned/
+On Trip/Maintenance/Out of Service). The column is a free string until the
+business picks one closed set.

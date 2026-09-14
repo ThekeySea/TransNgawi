@@ -96,14 +96,17 @@ Do not repeat the same information excessively.
 ## 9. Seat Selection
 
 Seat UI must visually communicate:
-- available;
+- available (e.g., Green color);
 - selected;
-- unavailable;
+- unavailable / held (e.g., Red or Grey color);
 - any special/reserved state that is actually configured.
 
-Color cannot be the only state indicator.
+Color cannot be the only state indicator. **Seat rendering must dynamically support 2-2 and 1-1 layouts based on the backend bus template. Differentiate travel classes by using distinct shapes or symbols for each class (e.g., Sukian vs. SukianPlus vs. SukianPro) so users can easily distinguish them on the seat map.**
 
 The final availability is always validated by the backend.
+
+**Checkout Timer (15-Minute Hold):** 
+Once a seat is selected and the user proceeds to fill in passenger data, the frontend must display a visible 15-minute countdown timer. This informs the user that their selected seat is in a `HELD` state and will expire if payment instructions are not completed.
 
 ## 10. Homepage Implementation
 

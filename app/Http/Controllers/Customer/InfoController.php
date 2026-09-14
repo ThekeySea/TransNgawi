@@ -11,6 +11,8 @@ class InfoController extends Controller
     {
         return view('customer.info.classes', [
             'classes' => MockData::classes(),
+            'serviceTypes' => MockData::serviceTypes(),
+            'routes' => MockData::routes(),
         ]);
     }
 
