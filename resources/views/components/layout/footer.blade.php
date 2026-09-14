@@ -39,7 +39,7 @@
             <div>
                 <h4 class="mb-5 text-xs font-bold uppercase tracking-widest text-[#ff750f]">Bantuan</h4>
                 <ul class="space-y-3.5 text-sm">
-                    <li><a href="{{ route('track.index') }}" class="text-neutral-400 transition-colors hover:text-white">Lacak Tiket</a></li>
+                    <li><a href="{{ route('my-trips.index') }}" class="text-neutral-400 transition-colors hover:text-white">Lacak Tiket</a></li>
                     <li><a href="{{ route('help.index') }}" class="text-neutral-400 transition-colors hover:text-white">Pusat Bantuan</a></li>
                     <li><a href="{{ route('help.index') }}" class="text-neutral-400 transition-colors hover:text-white">Syarat & Ketentuan</a></li>
                 </ul>

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\BusModelType;
+use App\Enums\BusStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -26,7 +27,7 @@ class BusRequest extends FormRequest
         return [
             'plate_number' => ['required', 'string', 'max:50', Rule::unique('buses', 'plate_number')->ignore($bus?->id)],
             'model_type' => ['required', Rule::enum(BusModelType::class)],
-            'status' => ['required', 'string', 'max:50'],
+            'status' => ['required', Rule::enum(BusStatus::class)],
         ];
     }
 }

@@ -97,6 +97,45 @@ class MockData
                 'seats_available' => 4,
                 'facilities' => ['Sleeper', 'Personal TV'],
             ],
+            [
+                'id' => 4,
+                'origin' => 'Yogyakarta',
+                'destination' => 'Jakarta',
+                'service' => 'SATSET',
+                'departure' => '10:00',
+                'arrival' => '18:30',
+                'duration' => '8j 30m',
+                'class' => 'Sukian',
+                'price' => 180000,
+                'seats_available' => 15,
+                'facilities' => ['AC', 'Snack'],
+            ],
+            [
+                'id' => 5,
+                'origin' => 'Yogyakarta',
+                'destination' => 'Jakarta',
+                'service' => 'SATSET',
+                'departure' => '16:00',
+                'arrival' => '00:30',
+                'duration' => '8j 30m',
+                'class' => 'SukianPlus',
+                'price' => 270000,
+                'seats_available' => 10,
+                'facilities' => ['AC', 'Reclining Seat', 'USB'],
+            ],
+            [
+                'id' => 6,
+                'origin' => 'Surabaya',
+                'destination' => 'Serang',
+                'service' => 'BIASANE',
+                'departure' => '07:00',
+                'arrival' => '19:00',
+                'duration' => '12j 00m',
+                'class' => 'Sukian',
+                'price' => 160000,
+                'seats_available' => 20,
+                'facilities' => ['AC', 'Snack'],
+            ],
         ];
 
         if (! empty($filters['origin'])) {
@@ -106,6 +145,29 @@ class MockData
         if (! empty($filters['destination'])) {
             $trips = array_values(array_filter($trips, fn ($t) => $t['destination'] === $filters['destination']));
         }
+
+        if (! empty($filters['service'])) {
+            $serviceUpper = strtoupper($filters['service']);
+            $trips = array_values(array_filter($trips, fn ($t) => $t['service'] === $serviceUpper));
+        }
+
+        if (! empty($filters['class'])) {
+            $classMap = [
+                'sukian' => 'Sukian',
+                'sukianplus' => 'SukianPlus',
+                'sukianpro' => 'SukianPro',
+            ];
+            $className = $classMap[strtolower($filters['class'])] ?? $filters['class'];
+            $trips = array_values(array_filter($trips, fn ($t) => $t['class'] === $className));
+        }
+
+        foreach ($trips as &$trip) {
+            $trip['service_lower'] = strtolower($trip['service']);
+            $trip['class_lower'] = strtolower($trip['class']);
+        }
+        unset($trip);
+
+        return $trips;
 
         return $trips;
     }

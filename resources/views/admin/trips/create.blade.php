@@ -8,7 +8,7 @@
         <p class="mt-2 text-base text-[#555555]">Langkah {{ $step }} dari 4.</p>
 
         @php
-            $steps = [1 => 'Layanan', 2 => 'Rute', 3 => 'Jadwal & Bus', 4 => 'Harga'];
+            $steps = [1 => 'Layanan', 2 => 'Rute', 3 => 'Jadwal & Bus', 4 => 'Harga', 5 => 'Detail Trip'];
         @endphp
         <ol class="mt-6 flex flex-wrap gap-2 text-xs font-semibold" aria-label="Langkah pembuatan trip">
             @foreach ($steps as $number => $label)
@@ -109,8 +109,85 @@
                         <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
                     @enderror
                     <div class="mt-6 flex gap-3">
-                        <button type="submit" class="btn-primary">Buat Trip</button>
+                        <button type="submit" class="btn-primary">Lanjut ke Detail Trip</button>
                         <a href="{{ route('admin.trips.create', ['step' => 3]) }}" class="btn-secondary">Kembali</a>
+                    </div>
+                </form>
+            @endif
+
+            @if ($step === 5)
+                <form method="POST" action="{{ route('admin.trips.store-step-5') }}" class="space-y-6">
+                    @csrf
+
+                    <div>
+                        <p class="input-label">Fasilitas Bus</p>
+                        <div class="flex flex-wrap gap-3">
+                            @foreach ($availableAmenities as $amenity)
+                                @php
+                                    $checked = in_array($amenity, old('amenities', $wizard['amenities'] ?? []));
+                                @endphp
+                                <label class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm cursor-pointer transition-all @if($checked) border-[#ff750f] bg-[#ff750f]/10 text-[#ff750f] @else border-[#e6e6e6] text-[#555555] @endif">
+                                    <input type="checkbox" name="amenities[]" value="{{ $amenity }}" @if($checked) checked @endif class="sr-only" x-data x-effect="$el.closest('label').classList.toggle('border-[#ff750f]', $el.checked); $el.closest('label').classList.toggle('bg-[#ff750f]/10', $el.checked); $el.closest('label').classList.toggle('text-[#ff750f]', $el.checked)">
+                                    {{ $amenity }}
+                                </label>
+                            @endforeach
+                        </div>
+                        @error('amenities')
+                            <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                        <div>
+                            <p class="input-label">Foto Eksterior (URL)</p>
+                            @for ($i = 0; $i < 3; $i++)
+                                <input type="url" name="exterior_photos[]" placeholder="https://..." value="{{ old('exterior_photos.'.$i, $wizard['exterior_photos'][$i] ?? '') }}" class="mb-2 w-full rounded-lg border border-[#e6e6e6] px-3 py-2 text-sm">
+                            @endfor
+                            @error('exterior_photos')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <p class="input-label">Foto Interior (URL)</p>
+                            @for ($i = 0; $i < 3; $i++)
+                                <input type="url" name="interior_photos[]" placeholder="https://..." value="{{ old('interior_photos.'.$i, $wizard['interior_photos'][$i] ?? '') }}" class="mb-2 w-full rounded-lg border border-[#e6e6e6] px-3 py-2 text-sm">
+                            @endfor
+                            @error('interior_photos')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <p class="input-label">Foto Fasilitas (URL)</p>
+                            @for ($i = 0; $i < 3; $i++)
+                                <input type="url" name="facility_photos[]" placeholder="https://..." value="{{ old('facility_photos.'.$i, $wizard['facility_photos'][$i] ?? '') }}" class="mb-2 w-full rounded-lg border border-[#e6e6e6] px-3 py-2 text-sm">
+                            @endfor
+                            @error('facility_photos')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <x-ui.input label="Alamat Titik Naik" name="origin_address" :value="old('origin_address', $wizard['origin_address'] ?? '')" placeholder="Terminal Bus Ngawi, Jl...." :error="$errors->first('origin_address')" />
+                        <x-ui.input label="Alamat Titik Turun" name="destination_address" :value="old('destination_address', $wizard['destination_address'] ?? '')" placeholder="Terminal Kertajaya, Jl...." :error="$errors->first('destination_address')" />
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <x-ui.input label="Nama Titik Istirahat (opsional)" name="rest_stop_name" :value="old('rest_stop_name', $wizard['rest_stop_name'] ?? '')" placeholder="Rest Area KM 50" :error="$errors->first('rest_stop_name')" />
+                        <x-ui.input label="Alamat Titik Istirahat (opsional)" name="rest_stop_address" :value="old('rest_stop_address', $wizard['rest_stop_address'] ?? '')" placeholder="Jl. Raya..." :error="$errors->first('rest_stop_address')" />
+                    </div>
+
+                    <div>
+                        <p class="input-label">Kebijakan Perjalanan</p>
+                        <textarea name="policy" rows="4" class="w-full rounded-lg border border-[#e6e6e6] px-3 py-2 text-sm" placeholder="Pembatalan, penggantian jadwal, bagasi, dll.">{{ old('policy', $wizard['policy'] ?? '') }}</textarea>
+                        @error('policy')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="submit" class="btn-primary">Buat Trip</button>
+                        <a href="{{ route('admin.trips.create', ['step' => 4]) }}" class="btn-secondary">Kembali</a>
                     </div>
                 </form>
             @endif

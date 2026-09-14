@@ -1,17 +1,18 @@
-<header
+ <header
     class="fixed top-0 left-0 right-0 z-[var(--z-nav)] transition-all duration-300 ease-in-out"
     x-data="{
         open: false,
         scrolled: false,
+        forceSolid: {{ request()->routeIs('help.index', 'help.show', 'my-trips.index', 'track.show', 'tickets.show') ? 'true' : 'false' }},
         init() {
             this.updateScrolled();
             window.addEventListener('scroll', () => this.updateScrolled(), { passive: true });
         },
         updateScrolled() {
-            this.scrolled = window.scrollY > 80;
+            this.scrolled = window.scrollY > 80 || this.forceSolid;
         }
     }"
-    :class="scrolled
+    :class="scrolled || forceSolid
         ? 'bg-white/95 backdrop-blur-md border-b border-border shadow-md py-2'
         : 'bg-transparent py-4'"
 >
@@ -41,20 +42,20 @@
                         ? ({{ request()->routeIs('classes.index') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-[#1a1a1a] hover:text-[#ff750f]')
                         : ({{ request()->routeIs('classes.index') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-white/90 hover:text-[#ff750f]')"
                 >Kelas</a>
-                <a href="{{ route('search.index') }}" class="text-sm font-semibold transition-colors duration-200"
+                <a href="{{ route('perjalanan.index') }}" class="text-sm font-semibold transition-colors duration-200"
                     :class="scrolled
-                        ? ({{ request()->routeIs('search.index') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-[#1a1a1a] hover:text-[#ff750f]')
-                        : ({{ request()->routeIs('search.index') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-white/90 hover:text-[#ff750f]')"
+                        ? ({{ request()->routeIs('search.index', 'perjalanan.index') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-[#1a1a1a] hover:text-[#ff750f]')
+                        : ({{ request()->routeIs('search.index', 'perjalanan.index') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-white/90 hover:text-[#ff750f]')"
                 >Perjalanan</a>
                 <a href="{{ route('help.index') }}" class="text-sm font-semibold transition-colors duration-200"
                     :class="scrolled
-                        ? ({{ request()->routeIs('help.index') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-[#1a1a1a] hover:text-[#ff750f]')
-                        : ({{ request()->routeIs('help.index') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-white/90 hover:text-[#ff750f]')"
+                        ? ({{ request()->routeIs('help.index', 'help.show') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-[#1a1a1a] hover:text-[#ff750f]')
+                        : ({{ request()->routeIs('help.index', 'help.show') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-white/90 hover:text-[#ff750f]')"
                 >Bantuan</a>
-                <a href="{{ route('track.index') }}" class="text-sm font-semibold transition-colors duration-200"
+                <a href="{{ route('my-trips.index') }}" class="text-sm font-semibold transition-colors duration-200"
                     :class="scrolled
-                        ? ({{ request()->routeIs('track.index') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-[#1a1a1a] hover:text-[#ff750f]')
-                        : ({{ request()->routeIs('track.index') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-white/90 hover:text-[#ff750f]')"
+                        ? ({{ request()->routeIs('my-trips.index') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-[#1a1a1a] hover:text-[#ff750f]')
+                        : ({{ request()->routeIs('my-trips.index') ? 'true' : 'false' }} ? 'text-[#ff750f]' : 'text-white/90 hover:text-[#ff750f]')"
                 >Lacak Tiket</a>
             </nav>
 
@@ -89,9 +90,9 @@
         <nav class="container-app flex flex-col gap-1 py-4" aria-label="Navigasi mobile">
             <a href="{{ route('about.index') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold @if(request()->routeIs('about.index')) bg-[#ff750f]/10 text-[#ff750f] @else text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f] @endif" @click="open = false">Tentang</a>
             <a href="{{ route('classes.index') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold @if(request()->routeIs('classes.index')) bg-[#ff750f]/10 text-[#ff750f] @else text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f] @endif" @click="open = false">Kelas</a>
-            <a href="{{ route('search.index') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold @if(request()->routeIs('search.index')) bg-[#ff750f]/10 text-[#ff750f] @else text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f] @endif" @click="open = false">Perjalanan</a>
-            <a href="{{ route('help.index') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold @if(request()->routeIs('help.index')) bg-[#ff750f]/10 text-[#ff750f] @else text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f] @endif" @click="open = false">Bantuan</a>
-            <a href="{{ route('track.index') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold @if(request()->routeIs('track.index')) bg-[#ff750f]/10 text-[#ff750f] @else text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f] @endif" @click="open = false">Lacak Tiket</a>
+            <a href="{{ route('perjalanan.index') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold @if(request()->routeIs('search.index', 'perjalanan.index')) bg-[#ff750f]/10 text-[#ff750f] @else text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f] @endif" @click="open = false">Perjalanan</a>
+            <a href="{{ route('help.index') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold @if(request()->routeIs('help.index', 'help.show')) bg-[#ff750f]/10 text-[#ff750f] @else text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f] @endif" @click="open = false">Bantuan</a>
+            <a href="{{ route('my-trips.index') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold @if(request()->routeIs('my-trips.index')) bg-[#ff750f]/10 text-[#ff750f] @else text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f] @endif" @click="open = false">Lacak Tiket</a>
             @auth
                 <a href="{{ route('dashboard') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f]" @click="open = false">Dashboard</a>
             @else

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\BusModelType;
+use App\Enums\BusStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,6 +20,7 @@ class Bus extends Model
     {
         return [
             'model_type' => BusModelType::class,
+            'status' => BusStatus::class,
         ];
     }
 
@@ -28,5 +30,21 @@ class Bus extends Model
     public function trips(): HasMany
     {
         return $this->hasMany(Trip::class);
+    }
+
+    /**
+     * Issues reported for this bus.
+     */
+    public function issues(): HasMany
+    {
+        return $this->hasMany(BusIssue::class);
+    }
+
+    /**
+     * Maintenance records for this bus.
+     */
+    public function maintenanceRecords(): HasMany
+    {
+        return $this->hasMany(MaintenanceRecord::class);
     }
 }

@@ -7,7 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['route_id', 'bus_id', 'departs_at', 'arrives_at'])]
+#[Fillable([
+    'trip_code', 'route_id', 'bus_id', 'departs_at', 'arrives_at',
+    'amenities', 'exterior_photos', 'interior_photos', 'facility_photos',
+    'origin_address', 'destination_address',
+    'rest_stop_name', 'rest_stop_address',
+    'policy',
+])]
 class Trip extends Model
 {
     /**
@@ -20,7 +26,41 @@ class Trip extends Model
         return [
             'departs_at' => 'datetime',
             'arrives_at' => 'datetime',
+            'amenities' => 'array',
+            'exterior_photos' => 'array',
+            'interior_photos' => 'array',
+            'facility_photos' => 'array',
         ];
+    }
+
+    /**
+     * Prevent trip_code from being updated after creation.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (Trip $trip) {
+            if (empty($trip->trip_code)) {
+                $trip->trip_code = self::generateCode();
+            }
+        });
+
+        static::updating(function (Trip $trip) {
+            if ($trip->isDirty('trip_code') && $trip->getOriginal('trip_code')) {
+                $trip->trip_code = $trip->getOriginal('trip_code');
+            }
+        });
+    }
+
+    /**
+     * Generate a unique trip code (e.g., TRIP-20260914-X89A).
+     */
+    public static function generateCode(): string
+    {
+        do {
+            $code = 'TRIP-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2)));
+        } while (self::where('trip_code', $code)->exists());
+
+        return $code;
     }
 
     /**

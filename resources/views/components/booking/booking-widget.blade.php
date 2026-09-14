@@ -1,7 +1,7 @@
 @props(['action' => null, 'compact' => false])
 
 @php
-    $action = $action ?? route('search.index');
+    $action = $action ?? route('perjalanan.index');
     $cities = \App\Support\MockData::cities();
     $services = \App\Support\MockData::serviceTypes();
 @endphp

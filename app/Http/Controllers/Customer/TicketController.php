@@ -3,20 +3,22 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
-use App\Support\MockData;
+use App\Models\Booking;
 
 class TicketController extends Controller
 {
     public function show(string $code)
     {
-        $ticket = MockData::ticket($code);
+        $booking = Booking::with(['trip.route.origin', 'trip.route.destination', 'trip.bus', 'seats'])
+            ->where('code', $code)
+            ->first();
 
-        if (! $ticket) {
+        if (! $booking || $booking->status !== 'CONFIRMED') {
             abort(404);
         }
 
         return view('customer.tickets.show', [
-            'ticket' => $ticket,
+            'booking' => $booking,
         ]);
     }
 }

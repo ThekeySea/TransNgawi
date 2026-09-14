@@ -18,12 +18,11 @@
 </div>
 
 <div class="mt-5">
-    <x-ui.input
-        label="Status"
-        name="status"
-        :value="old('status', $bus->status ?? 'IDLE')"
-        :error="$errors->first('status')"
-        hint="Status operasional bus (mis. IDLE)."
-        required
-    />
+    <x-ui.select label="Status" name="status" :error="$errors->first('status')" required>
+        <option value="">— Pilih status —</option>
+        @foreach (\App\Enums\BusStatus::cases() as $status)
+            <option value="{{ $status->value }}" @selected(old('status', ($bus->status ?? null)?->value) === $status->value)>{{ $status->label() }}</option>
+        @endforeach
+    </x-ui.select>
+    <p class="mt-1.5 text-sm text-[#555555]">Bus hanya bisa ditugaskan ke trip baru saat status Tersedia (IDLE).</p>
 </div>

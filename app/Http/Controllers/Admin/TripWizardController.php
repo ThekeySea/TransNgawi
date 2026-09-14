@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\ServiceCategory;
+use App\Enums\BusStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\WizardStepFourRequest;
+use App\Http\Requests\Admin\WizardStepFiveRequest;
 use App\Http\Requests\Admin\WizardStepOneRequest;
 use App\Http\Requests\Admin\WizardStepThreeRequest;
 use App\Http\Requests\Admin\WizardStepTwoRequest;
@@ -21,7 +23,7 @@ class TripWizardController extends Controller
 
     public function create(int $step): View|RedirectResponse
     {
-        if ($step < 1 || $step > 4) {
+        if ($step < 1 || $step > 5) {
             abort(404);
         }
 
@@ -44,7 +46,7 @@ class TripWizardController extends Controller
         }
 
         if ($step === 3) {
-            $data['buses'] = Bus::orderBy('plate_number')->get();
+            $data['buses'] = Bus::where('status', BusStatus::IDLE)->orderBy('plate_number')->get();
         }
 
         if ($step === 4) {
@@ -53,6 +55,10 @@ class TripWizardController extends Controller
             $data['route'] = Route::with(['origin', 'destination'])->findOrFail($wizard['route_id']);
             $data['allowedClasses'] = BusSeatTemplate::allowedClasses($bus->model_type);
             $data['seatCount'] = count(BusSeatTemplate::seats($bus->model_type));
+        }
+
+        if ($step === 5) {
+            $data['availableAmenities'] = ['WiFi', 'Toilet', 'USB', 'Selimut', 'Cemilan', 'Bantal', 'Makanan'];
         }
 
         return view('admin.trips.create', $data);
@@ -102,10 +108,27 @@ class TripWizardController extends Controller
         return redirect()->route('admin.trips.create', ['step' => 4]);
     }
 
-    public function storeStepFour(WizardStepFourRequest $request, TripCreationService $service): RedirectResponse
+    public function storeStepFour(WizardStepFourRequest $request): RedirectResponse
+    {
+        session()->put(self::SESSION_KEY.'.fares', $request->validated()['fares']);
+
+        return redirect()->route('admin.trips.create', ['step' => 5]);
+    }
+
+    public function storeStepFive(WizardStepFiveRequest $request, TripCreationService $service): RedirectResponse
     {
         $wizard = session(self::SESSION_KEY, []);
-        $wizard['fares'] = $request->validated()['fares'];
+        $validated = $request->validated();
+
+        $wizard['amenities'] = $validated['amenities'] ?? null;
+        $wizard['exterior_photos'] = $validated['exterior_photos'] ?? null;
+        $wizard['interior_photos'] = $validated['interior_photos'] ?? null;
+        $wizard['facility_photos'] = $validated['facility_photos'] ?? null;
+        $wizard['origin_address'] = $validated['origin_address'] ?? null;
+        $wizard['destination_address'] = $validated['destination_address'] ?? null;
+        $wizard['rest_stop_name'] = $validated['rest_stop_name'] ?? null;
+        $wizard['rest_stop_address'] = $validated['rest_stop_address'] ?? null;
+        $wizard['policy'] = $validated['policy'] ?? null;
 
         $service->create($wizard);
 
@@ -131,6 +154,10 @@ class TripWizardController extends Controller
 
         if ($step >= 4 && (empty($wizard['bus_id']) || empty($wizard['departs_at']) || empty($wizard['arrives_at']))) {
             return redirect()->route('admin.trips.create', ['step' => 3]);
+        }
+
+        if ($step >= 5 && empty($wizard['fares'])) {
+            return redirect()->route('admin.trips.create', ['step' => 4]);
         }
 
         return null;

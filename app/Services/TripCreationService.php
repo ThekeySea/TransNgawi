@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\BusStatus;
 use App\Enums\ServiceCategory;
 use App\Models\Bus;
 use App\Models\Route;
@@ -84,6 +85,10 @@ class TripCreationService
         $bus = Bus::find($data['bus_id'])
             ?? throw ValidationException::withMessages(['bus_id' => 'Bus tidak ditemukan.']);
 
+        if (! $bus->status->canBeAssigned()) {
+            throw ValidationException::withMessages(['bus_id' => 'Bus "'.$bus->plate_number.'" berstatus '.$bus->status->label().' dan tidak bisa ditugaskan ke trip baru.']);
+        }
+
         if ($error = $this->fareClassesError($bus, array_keys($data['fares'] ?? []))) {
             throw ValidationException::withMessages(['fares' => $error]);
         }
@@ -100,6 +105,15 @@ class TripCreationService
                 'bus_id' => $data['bus_id'],
                 'departs_at' => $data['departs_at'],
                 'arrives_at' => $data['arrives_at'],
+                'amenities' => $data['amenities'] ?? null,
+                'exterior_photos' => $data['exterior_photos'] ?? null,
+                'interior_photos' => $data['interior_photos'] ?? null,
+                'facility_photos' => $data['facility_photos'] ?? null,
+                'origin_address' => $data['origin_address'] ?? null,
+                'destination_address' => $data['destination_address'] ?? null,
+                'rest_stop_name' => $data['rest_stop_name'] ?? null,
+                'rest_stop_address' => $data['rest_stop_address'] ?? null,
+                'policy' => $data['policy'] ?? null,
             ]);
 
             foreach ($data['fares'] as $class => $amount) {
@@ -109,6 +123,9 @@ class TripCreationService
             foreach (BusSeatTemplate::seats($bus->model_type) as $seat) {
                 $trip->seats()->create($seat);
             }
+
+            // Automatically set bus to ACTIVE when trip is assigned
+            $bus->update(['status' => BusStatus::ACTIVE]);
 
             return $trip;
         });
