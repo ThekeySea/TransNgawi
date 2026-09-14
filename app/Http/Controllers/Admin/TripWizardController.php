@@ -59,6 +59,22 @@ class TripWizardController extends Controller
 
         if ($step === 5) {
             $data['availableAmenities'] = ['WiFi', 'Toilet', 'USB', 'Selimut', 'Cemilan', 'Bantal', 'Makanan'];
+
+            $route = Route::with(['origin', 'destination'])->findOrFail($wizard['route_id']);
+            $service = ServiceCategory::from($wizard['service_category']);
+
+            $originQuery = $route->origin->stopPoints();
+            $destinationQuery = $route->destination->stopPoints();
+
+            // For SATSET, only show important points
+            if ($service === ServiceCategory::SATSET) {
+                $originQuery->where('is_important_point', true);
+                $destinationQuery->where('is_important_point', true);
+            }
+
+            $data['originStopPoints'] = $originQuery->orderBy('name')->get();
+            $data['destinationStopPoints'] = $destinationQuery->orderBy('name')->get();
+            $data['route'] = $route;
         }
 
         return view('admin.trips.create', $data);
@@ -124,6 +140,8 @@ class TripWizardController extends Controller
         $wizard['exterior_photos'] = $validated['exterior_photos'] ?? null;
         $wizard['interior_photos'] = $validated['interior_photos'] ?? null;
         $wizard['facility_photos'] = $validated['facility_photos'] ?? null;
+        $wizard['origin_stop_point_id'] = $validated['origin_stop_point_id'] ?? null;
+        $wizard['destination_stop_point_id'] = $validated['destination_stop_point_id'] ?? null;
         $wizard['origin_address'] = $validated['origin_address'] ?? null;
         $wizard['destination_address'] = $validated['destination_address'] ?? null;
         $wizard['rest_stop_name'] = $validated['rest_stop_name'] ?? null;

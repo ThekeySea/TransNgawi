@@ -6,6 +6,7 @@ use App\Enums\BusStatus;
 use App\Enums\ServiceCategory;
 use App\Models\Bus;
 use App\Models\Route;
+use App\Models\StopPoint;
 use App\Models\Trip;
 use App\Support\BusSeatTemplate;
 use Illuminate\Support\Facades\DB;
@@ -65,6 +66,38 @@ class TripCreationService
     }
 
     /**
+     * Validasi stop points: harus ada, milik lokasi yang benar, dan untuk SATSET harus important.
+     */
+    private function validateStopPoints(Route $route, ServiceCategory $service, ?int $originStopPointId, ?int $destStopPointId): void
+    {
+        if ($originStopPointId) {
+            $originSp = StopPoint::find($originStopPointId);
+            if (! $originSp) {
+                throw ValidationException::withMessages(['origin_stop_point_id' => 'Titik berangkat tidak ditemukan.']);
+            }
+            if ($originSp->location_id !== $route->origin_id) {
+                throw ValidationException::withMessages(['origin_stop_point_id' => 'Titik berangkat harus berada di kota asal yang dipilih.']);
+            }
+            if ($service === ServiceCategory::SATSET && ! $originSp->is_important_point) {
+                throw ValidationException::withMessages(['origin_stop_point_id' => 'SATSET hanya boleh menggunakan titik berangkat yang merupakan tempat penting.']);
+            }
+        }
+
+        if ($destStopPointId) {
+            $destSp = StopPoint::find($destStopPointId);
+            if (! $destSp) {
+                throw ValidationException::withMessages(['destination_stop_point_id' => 'Titik destinasi tidak ditemukan.']);
+            }
+            if ($destSp->location_id !== $route->destination_id) {
+                throw ValidationException::withMessages(['destination_stop_point_id' => 'Titik destinasi harus berada di kota tujuan yang dipilih.']);
+            }
+            if ($service === ServiceCategory::SATSET && ! $destSp->is_important_point) {
+                throw ValidationException::withMessages(['destination_stop_point_id' => 'SATSET hanya boleh menggunakan titik destinasi yang merupakan tempat penting.']);
+            }
+        }
+    }
+
+    /**
      * Buat trip + harga + inventaris kursi secara transaksional.
      * Memvalidasi ulang semua aturan dari data wizard (jangan percaya sesi/input).
      *
@@ -99,6 +132,13 @@ class TripCreationService
             }
         }
 
+        $this->validateStopPoints(
+            $route,
+            $service,
+            $data['origin_stop_point_id'] ?? null,
+            $data['destination_stop_point_id'] ?? null
+        );
+
         return DB::transaction(function () use ($data, $bus) {
             $trip = Trip::create([
                 'route_id' => $data['route_id'],
@@ -109,6 +149,8 @@ class TripCreationService
                 'exterior_photos' => $data['exterior_photos'] ?? null,
                 'interior_photos' => $data['interior_photos'] ?? null,
                 'facility_photos' => $data['facility_photos'] ?? null,
+                'origin_stop_point_id' => $data['origin_stop_point_id'] ?? null,
+                'destination_stop_point_id' => $data['destination_stop_point_id'] ?? null,
                 'origin_address' => $data['origin_address'] ?? null,
                 'destination_address' => $data['destination_address'] ?? null,
                 'rest_stop_name' => $data['rest_stop_name'] ?? null,

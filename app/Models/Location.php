@@ -37,4 +37,12 @@ class Location extends Model
     {
         return $this->hasMany(Route::class, 'destination_id');
     }
+
+    /**
+     * Stop points / titik pemberhentian under this location.
+     */
+    public function stopPoints(): HasMany
+    {
+        return $this->hasMany(StopPoint::class);
+    }
 }

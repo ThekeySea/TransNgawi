@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Bus;
 use App\Models\Location;
 use App\Models\Route;
+use App\Models\StopPoint;
 use App\Models\Trip;
 use App\Models\User;
 use App\Services\BookingService;
@@ -990,5 +991,214 @@ class AdminManagementTest extends TestCase
         $response = $this->get(route('invoice.download', $booking->code));
         $response->assertOk();
         $response->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_admin_manages_stop_points_via_location_form(): void
+    {
+        $admin = $this->admin();
+
+        // Create location with stop points
+        $this->actingAs($admin)->post('/admin/locations', [
+            'name' => 'Surabaya',
+            'is_important' => '1',
+            'stop_points' => [
+                ['name' => 'Terminal Purabaya', 'address' => 'Jl. Ahmad Yani'],
+                ['name' => 'Bandara Juanda', 'is_important_point' => '1'],
+            ],
+        ])->assertRedirect(route('admin.locations.index'));
+
+        $location = Location::where('name', 'Surabaya')->first();
+        $this->assertNotNull($location);
+        $this->assertCount(2, $location->stopPoints);
+
+        $terminal = $location->stopPoints()->where('name', 'Terminal Purabaya')->first();
+        $this->assertNotNull($terminal);
+        $this->assertFalse($terminal->is_important_point);
+        $this->assertEquals('Jl. Ahmad Yani', $terminal->address);
+
+        $airport = $location->stopPoints()->where('name', 'Bandara Juanda')->first();
+        $this->assertNotNull($airport);
+        $this->assertTrue($airport->is_important_point);
+    }
+
+    public function test_stop_point_important_requires_parent_important(): void
+    {
+        $admin = $this->admin();
+
+        // Create location WITHOUT is_important, but try to set stop point as important
+        $this->actingAs($admin)->post('/admin/locations', [
+            'name' => 'Kota Non-Penting',
+            'stop_points' => [
+                ['name' => 'Terminal', 'is_important_point' => '1'],
+            ],
+        ])->assertSessionHasErrors('stop_points.0.is_important_point');
+
+        // Validation blocks creation because stop point is_important_point conflicts with parent
+        $this->assertDatabaseMissing('locations', ['name' => 'Kota Non-Penting']);
+    }
+
+    public function test_stop_point_not_important_allows_any_parent(): void
+    {
+        $admin = $this->admin();
+
+        // Create location WITHOUT is_important, stop point is NOT important
+        $this->actingAs($admin)->post('/admin/locations', [
+            'name' => 'Kota Biasa',
+            'stop_points' => [
+                ['name' => 'Terminal Biasa'],
+            ],
+        ])->assertRedirect(route('admin.locations.index'));
+
+        $location = Location::where('name', 'Kota Biasa')->first();
+        $this->assertNotNull($location);
+        $this->assertCount(1, $location->stopPoints);
+    }
+
+    public function test_location_update_syncs_stop_points(): void
+    {
+        $admin = $this->admin();
+
+        $location = Location::create(['name' => 'Test City', 'is_important' => true]);
+        $sp1 = $location->stopPoints()->create(['name' => 'Old Terminal']);
+
+        // Update: keep sp1, add sp2
+        $this->actingAs($admin)->put("/admin/locations/{$location->id}", [
+            'name' => 'Test City',
+            'is_important' => '1',
+            'stop_points' => [
+                ['id' => $sp1->id, 'name' => 'Updated Terminal'],
+                ['name' => 'New Stop'],
+            ],
+        ])->assertRedirect(route('admin.locations.index'));
+
+        $this->assertCount(2, $location->fresh()->stopPoints);
+        $this->assertDatabaseHas('stop_points', ['id' => $sp1->id, 'name' => 'Updated Terminal']);
+        $this->assertDatabaseHas('stop_points', ['location_id' => $location->id, 'name' => 'New Stop']);
+    }
+
+    public function test_wizard_satset_requires_important_stop_points(): void
+    {
+        $admin = $this->admin();
+
+        $origin = Location::create(['name' => 'Surabaya', 'is_important' => true]);
+        $dest = Location::create(['name' => 'Cilegon', 'is_important' => true]);
+        $route = Route::create(['origin_id' => $origin->id, 'destination_id' => $dest->id, 'service_category' => 'satset']);
+        $bus = Bus::create(['plate_number' => 'SAT-01', 'model_type' => 'ANTIBU_SATSET', 'status' => 'IDLE']);
+
+        $originSp = $origin->stopPoints()->create(['name' => 'Terminal', 'is_important_point' => false]);
+        $destSp = $dest->stopPoints()->create(['name' => 'Pelabuhan', 'is_important_point' => true]);
+
+        $this->actingAs($admin)->post('/admin/trips/create/step-1', ['service_category' => 'satset']);
+        $this->actingAs($admin)->post('/admin/trips/create/step-2', ['route_id' => $route->id]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-3', [
+            'bus_id' => $bus->id,
+            'departs_at' => now()->addDays(2)->format('Y-m-d H:i'),
+            'arrives_at' => now()->addDays(3)->format('Y-m-d H:i'),
+        ]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-4', [
+            'fares' => ['Sukian' => 195000, 'SukianPlus' => 285000, 'SukianPro' => 420000],
+        ]);
+
+        // Try to use non-important origin stop point — should fail
+        $this->actingAs($admin)->post('/admin/trips/create/step-5', [
+            'origin_stop_point_id' => $originSp->id,
+            'destination_stop_point_id' => $destSp->id,
+        ])->assertSessionHasErrors('origin_stop_point_id');
+
+        $this->assertCount(0, Trip::all());
+    }
+
+    public function test_wizard_satset_accepts_important_stop_points(): void
+    {
+        $admin = $this->admin();
+
+        $origin = Location::create(['name' => 'Surabaya', 'is_important' => true]);
+        $dest = Location::create(['name' => 'Cilegon', 'is_important' => true]);
+        $route = Route::create(['origin_id' => $origin->id, 'destination_id' => $dest->id, 'service_category' => 'satset']);
+        $bus = Bus::create(['plate_number' => 'SAT-02', 'model_type' => 'ANTIBU_SATSET', 'status' => 'IDLE']);
+
+        $originSp = $origin->stopPoints()->create(['name' => 'Bandara', 'is_important_point' => true]);
+        $destSp = $dest->stopPoints()->create(['name' => 'Pelabuhan', 'is_important_point' => true]);
+
+        $this->actingAs($admin)->post('/admin/trips/create/step-1', ['service_category' => 'satset']);
+        $this->actingAs($admin)->post('/admin/trips/create/step-2', ['route_id' => $route->id]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-3', [
+            'bus_id' => $bus->id,
+            'departs_at' => now()->addDays(2)->format('Y-m-d H:i'),
+            'arrives_at' => now()->addDays(3)->format('Y-m-d H:i'),
+        ]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-4', [
+            'fares' => ['Sukian' => 195000, 'SukianPlus' => 285000, 'SukianPro' => 420000],
+        ]);
+
+        $this->actingAs($admin)->post('/admin/trips/create/step-5', [
+            'origin_stop_point_id' => $originSp->id,
+            'destination_stop_point_id' => $destSp->id,
+        ])->assertRedirect(route('admin.trips.index'));
+
+        $trip = Trip::first();
+        $this->assertNotNull($trip);
+        $this->assertEquals($originSp->id, $trip->origin_stop_point_id);
+        $this->assertEquals($destSp->id, $trip->destination_stop_point_id);
+    }
+
+    public function test_wizard_step5_shows_important_only_for_satset(): void
+    {
+        $admin = $this->admin();
+
+        $origin = Location::create(['name' => 'Surabaya', 'is_important' => true]);
+        $dest = Location::create(['name' => 'Cilegon', 'is_important' => true]);
+        $route = Route::create(['origin_id' => $origin->id, 'destination_id' => $dest->id, 'service_category' => 'satset']);
+        $bus = Bus::create(['plate_number' => 'SAT-03', 'model_type' => 'ANTIBU_SATSET', 'status' => 'IDLE']);
+
+        $originSp = $origin->stopPoints()->create(['name' => 'Bandara', 'is_important_point' => true]);
+        $destSp = $dest->stopPoints()->create(['name' => 'Pelabuhan', 'is_important_point' => true]);
+        $origin->stopPoints()->create(['name' => 'Terminal Biasa', 'is_important_point' => false]);
+        $dest->stopPoints()->create(['name' => 'Terminal Biasa', 'is_important_point' => false]);
+
+        $this->actingAs($admin)->post('/admin/trips/create/step-1', ['service_category' => 'satset']);
+        $this->actingAs($admin)->post('/admin/trips/create/step-2', ['route_id' => $route->id]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-3', [
+            'bus_id' => $bus->id,
+            'departs_at' => now()->addDays(2)->format('Y-m-d H:i'),
+            'arrives_at' => now()->addDays(3)->format('Y-m-d H:i'),
+        ]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-4', [
+            'fares' => ['Sukian' => 195000, 'SukianPlus' => 285000, 'SukianPro' => 420000],
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/trips/create/5');
+        $response->assertOk();
+        $response->assertSee('Bandara');
+        $response->assertSee('Pelabuhan');
+        $response->assertDontSee('Terminal Biasa');
+    }
+
+    public function test_wizard_step5_shows_all_stop_points_for_biasane(): void
+    {
+        $admin = $this->admin();
+
+        ['biasane' => $route, 'smallBus' => $bus] = $this->seedCatalog();
+
+        $route->origin->stopPoints()->create(['name' => 'Terminal A']);
+        $route->origin->stopPoints()->create(['name' => 'Halte B']);
+        $route->destination->stopPoints()->create(['name' => 'Terminal C']);
+
+        $this->actingAs($admin)->post('/admin/trips/create/step-1', ['service_category' => 'biasane']);
+        $this->actingAs($admin)->post('/admin/trips/create/step-2', ['route_id' => $route->id]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-3', [
+            'bus_id' => $bus->id,
+            'departs_at' => now()->addDays(2)->format('Y-m-d H:i'),
+            'arrives_at' => now()->addDays(3)->format('Y-m-d H:i'),
+        ]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-4', [
+            'fares' => ['Sukian' => 195000, 'SukianPlus' => 285000],
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/trips/create/5');
+        $response->assertOk();
+        $response->assertSee('Terminal A');
+        $response->assertSee('Halte B');
+        $response->assertSee('Terminal C');
     }
 }

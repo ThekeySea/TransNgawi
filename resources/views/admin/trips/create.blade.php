@@ -119,6 +119,26 @@
                 <form method="POST" action="{{ route('admin.trips.store-step-5') }}" class="space-y-6">
                     @csrf
 
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <x-ui.select label="Titik Berangkat" name="origin_stop_point_id" :error="$errors->first('origin_stop_point_id')" required>
+                            <option value="">— Pilih titik berangkat —</option>
+                            @foreach ($originStopPoints as $sp)
+                                <option value="{{ $sp->id }}" @selected((int) old('origin_stop_point_id', $wizard['origin_stop_point_id'] ?? 0) === $sp->id)>
+                                    {{ $sp->name }}{{ $sp->is_important_point ? ' ★' : '' }}
+                                </option>
+                            @endforeach
+                        </x-ui.select>
+                        <x-ui.select label="Titik Destinasi" name="destination_stop_point_id" :error="$errors->first('destination_stop_point_id')" required>
+                            <option value="">— Pilih titik destinasi —</option>
+                            @foreach ($destinationStopPoints as $sp)
+                                <option value="{{ $sp->id }}" @selected((int) old('destination_stop_point_id', $wizard['destination_stop_point_id'] ?? 0) === $sp->id)>
+                                    {{ $sp->name }}{{ $sp->is_important_point ? ' ★' : '' }}
+                                </option>
+                            @endforeach
+                        </x-ui.select>
+                    </div>
+                    <p class="text-xs text-[#555555]">★ = Tempat penting (bandara/pelabuhan). {{ strtoupper($wizard['service_category']) === 'SATSET' ? 'SATSET hanya menampilkan titik penting.' : '' }}</p>
+
                     <div>
                         <p class="input-label">Fasilitas Bus</p>
                         <div class="flex flex-wrap gap-3">
@@ -168,8 +188,8 @@
                     </div>
 
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                        <x-ui.input label="Alamat Titik Naik" name="origin_address" :value="old('origin_address', $wizard['origin_address'] ?? '')" placeholder="Terminal Bus Ngawi, Jl...." :error="$errors->first('origin_address')" />
-                        <x-ui.input label="Alamat Titik Turun" name="destination_address" :value="old('destination_address', $wizard['destination_address'] ?? '')" placeholder="Terminal Kertajaya, Jl...." :error="$errors->first('destination_address')" />
+                        <x-ui.input label="Alamat Tambahan Titik Naik (opsional)" name="origin_address" :value="old('origin_address', $wizard['origin_address'] ?? '')" placeholder="Jl. Ahmad Yani No. 1" :error="$errors->first('origin_address')" />
+                        <x-ui.input label="Alamat Tambahan Titik Turun (opsional)" name="destination_address" :value="old('destination_address', $wizard['destination_address'] ?? '')" placeholder="Jl. Slamet Riyadi No. 2" :error="$errors->first('destination_address')" />
                     </div>
 
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">

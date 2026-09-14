@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'trip_code', 'route_id', 'bus_id', 'departs_at', 'arrives_at',
     'amenities', 'exterior_photos', 'interior_photos', 'facility_photos',
+    'origin_stop_point_id', 'destination_stop_point_id',
     'origin_address', 'destination_address',
     'rest_stop_name', 'rest_stop_address',
     'policy',
@@ -93,5 +94,21 @@ class Trip extends Model
     public function seats(): HasMany
     {
         return $this->hasMany(TripSeat::class);
+    }
+
+    /**
+     * Origin stop point / titik berangkat.
+     */
+    public function originStopPoint(): BelongsTo
+    {
+        return $this->belongsTo(StopPoint::class, 'origin_stop_point_id');
+    }
+
+    /**
+     * Destination stop point / titik destinasi.
+     */
+    public function destinationStopPoint(): BelongsTo
+    {
+        return $this->belongsTo(StopPoint::class, 'destination_stop_point_id');
     }
 }
