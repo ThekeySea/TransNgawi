@@ -1,681 +1,275 @@
-# TransNgawi --- Architecture Specification
-
-## 1. Tujuan
-
-Dokumen ini menjelaskan bagaimana requirement PRD diterjemahkan menjadi
-struktur teknis.
-
-Prinsip: - simple; - maintainable; - testable; - secure; -
-concurrency-safe; - tidak over-engineered.
-
-Rekomendasi:
-
-> Laravel Monolith + Relational Database + satu frontend strategy yang
-> konsisten.
-
-------------------------------------------------------------------------
-
-# 2. Stack
-
-Backend: - Laravel; - PHP; - MySQL/MariaDB.
-
-Frontend dapat mempertahankan stack existing: - Blade + Alpine; -
-Blade + Livewire; - Laravel + Vue; - Laravel + React.
-
-**Jangan mengganti framework tanpa alasan teknis yang jelas.**
-
-------------------------------------------------------------------------
-
-# 3. Layer
-
-``` text
-Browser
-↓
-UI / Components
-↓
-Routes
-↓
-Controllers
-↓
-Requests / Policies
-↓
-Services
-↓
-Models / Domain Rules
-↓
-Database
-```
-
-Controller tidak boleh menjadi tempat business logic kompleks.
-
-------------------------------------------------------------------------
-
-# 4. Entity Map
-
-``` text
-User
-AdminRole
-Permission
-Customer
-Passenger
-
-RouteCategory
-Route
-Class
-Facility
-ClassFacility
-
-Bus
-Seat
-BusIssue
-MaintenanceRecord
-
-Trip
-TripStop
-TripFare
-TripSeat
-
-Booking
-BookingPassenger
-BookingSeat
-
-Payment
-PaymentVerification
-
-SupportSession
-SupportMessage
-
-Notification
-Feedback
-TrackingPosition
-ActivityLog
-```
-
-------------------------------------------------------------------------
-
-# 5. RouteCategory
-
-Fields:
-
-``` text
-id
-code
-name
-description
-active
-timestamps
-```
-
-Seed: - ANTIBU; - SATSET; - BIASANE.
-
-------------------------------------------------------------------------
-
-# 6. Route
-
-Fields:
-
-``` text
-id
-route_category_id
-origin
-destination
-description
-estimated_duration
-active
-timestamps
-```
-
-Relationship:
-
-``` text
-RouteCategory
-└── hasMany Route
-```
-
-Jangan menyimpan category sebagai free-text jika relational model
-digunakan.
-
-------------------------------------------------------------------------
-
-# 7. Class
-
-Fields:
-
-``` text
-id
-code
-name
-description
-active
-timestamps
-```
-
-Class: - Sukian; - SukianPlus; - SukianPro.
-
-Fasilitas dapat dipisahkan melalui Facility/ClassFacility.
-
-------------------------------------------------------------------------
-
-# 8. Bus
-
-Fields:
-
-``` text
-id
-fleet_code
-model
-manufacturer
-capacity
-operational_status
-active
-timestamps
-```
-
-Status: - Available; - Assigned; - On Trip; - Maintenance; - Out of
-Service.
-
-Bus Maintenance/Out of Service tidak boleh dipakai untuk trip baru.
-
-------------------------------------------------------------------------
-
-# 9. Seat
-
-Seat adalah konfigurasi fisik bus.
-
-Fields:
-
-``` text
-id
-bus_id
-seat_number
-row
-column
-seat_type
-active
-timestamps
-```
-
-------------------------------------------------------------------------
-
-# 10. Trip
-
-Trip adalah perjalanan yang benar-benar dapat dipesan.
-
-Fields:
-
-``` text
-id
-route_id
-bus_id
-departure_at
-arrival_at
-estimated_arrival_at
-status
-published_at
-cancellation_reason
-timestamps
-```
-
-------------------------------------------------------------------------
-
-# 11. TripFare
-
-Jangan menaruh harga final sebagai satu harga global pada Class.
-
-Fields:
-
-``` text
-id
-trip_id
-class_id
-base_price
-current_price
-available
-pricing_version
-timestamps
-```
-
-Harga final ditentukan PricingService.
-
-------------------------------------------------------------------------
-
-# 12. TripSeat
-
-TripSeat adalah inventory kursi untuk satu trip.
-
-Fields:
-
-``` text
-id
-trip_id
-seat_id
-status
-held_until
-booking_id
-timestamps
-```
-
-Status: - Available; - Held; - Booked; - Blocked.
-
-Gunakan constraint yang mencegah duplicate inventory.
-
-------------------------------------------------------------------------
-
-# 13. Booking
-
-Fields:
-
-``` text
-id
-booking_code
-trip_id
-customer_id nullable
-status
-subtotal
-total
-expires_at
-timestamps
-```
-
-Lifecycle:
-
-``` text
-Draft
-↓
-Pending Payment
-↓
-Waiting Verification
-↓
-Confirmed
-```
-
-Alternative:
-
-``` text
-Pending Payment → Expired
-Pending Payment → Cancelled
-Waiting Verification → Rejected
-Confirmed → Cancelled
-Confirmed → Refunded
-```
-
-Status transition harus dikontrol backend.
-
-------------------------------------------------------------------------
-
-# 14. BookingPassenger
-
-Satu booking dapat memiliki banyak passenger.
-
-Fields minimal:
-
-``` text
-id
-booking_id
-passenger_id nullable
-name
-identity_reference sesuai kebutuhan
-contact information sesuai kebutuhan
-timestamps
-```
-
-Jangan meminta personal data yang tidak diperlukan.
-
-------------------------------------------------------------------------
-
-# 15. BookingSeat
-
-Fields:
-
-``` text
-id
-booking_id
-trip_seat_id
-passenger_id
-price
-timestamps
-```
-
-Seat harus berasal dari trip yang sama.
-
-------------------------------------------------------------------------
-
-# 16. Seat Concurrency
-
-Seat booking adalah critical section.
-
-Gunakan: - transaction; - row lock; - server-side check; - unique
-constraint.
-
-Konsep:
-
-``` text
-BEGIN TRANSACTION
-↓
-LOCK TripSeat
-↓
-Check availability
-↓
-Check hold expiration
-↓
-Hold/Book
-↓
-Create BookingSeat
-↓
-COMMIT
-```
-
-Frontend tidak authoritative.
-
-------------------------------------------------------------------------
-
-# 17. Services
-
-Recommended:
-
-``` text
-BookingService
-SeatInventoryService
-PricingService
-PaymentVerificationService
-TicketService
-SupportSessionService
-TripStatusService
-TrackingService
-FleetIssueService
-NotificationService
-```
-
-------------------------------------------------------------------------
-
-# 18. BookingService
-
-Tanggung jawab: - create booking; - validate trip; - validate seats; -
-calculate authoritative total; - reserve seats; - manage lifecycle; -
-expire booking.
-
-Critical operations harus transaction-safe.
-
-------------------------------------------------------------------------
-
-# 19. SeatInventoryService
-
-Tanggung jawab: - availability; - hold; - release; - book; - block.
-
-Harus concurrency-safe.
-
-------------------------------------------------------------------------
-
-# 20. PricingService
-
-Tanggung jawab: - calculate fare; - apply route/class rules; - demand; -
-remaining seats; - date; - departure time; - pricing version.
-
-Frontend tidak boleh menentukan harga final.
-
-------------------------------------------------------------------------
-
-# 21. Payment
+# TransNgawi Architecture
+
+## 1. Architecture Style
+
+Use a Laravel monolith unless the repository or explicit requirements justify another architecture.
+
+Prefer Laravel-native mechanisms:
+- routes
+- controllers
+- form requests
+- policies
+- Eloquent models
+- migrations
+- services/actions where complexity justifies them
+- Blade/components for server-rendered UI where appropriate
+- existing frontend tooling already present in the repository
+
+Do not introduce a second application framework without a clear requirement.
+
+## 2. Domain Model
+
+Conceptual entities:
+
+### Identity / Authorization
+- User
+- AdminRole
+- Permission
+
+### Customer / Passenger
+- Customer
+- Passenger
+
+### Catalog
+- RouteCategory
+- Route
+- Class
+- Facility
+- ClassFacility
+
+### Fleet
+- Bus
+- Seat
+- BusIssue
+- MaintenanceRecord
+
+### Operations
+- Trip
+- TripStop
+- TripFare
+- TripSeat
+
+### Commerce
+- Booking
+- BookingPassenger
+- BookingSeat
+- Payment
+- PaymentVerification
+
+### Support
+- SupportSession
+- SupportMessage
+- Notification
+
+### Tracking / Feedback
+- TrackingPosition
+- Feedback
+
+### Audit
+- ActivityLog
+
+These are architectural targets. Inspect the existing project before creating or renaming tables/models.
+
+## 3. Relationship Concepts
+
+RouteCategory:
+- has many Routes
+
+Route:
+- belongs to RouteCategory
+- has many Trips
+
+Class:
+- has many configured facilities through ClassFacility
+- can be assigned to trips where business rules permit
+
+Bus:
+- has many Seats
+- participates in Trips
+- can have BusIssues and MaintenanceRecords
+
+Trip:
+- belongs to Route
+- uses a Bus
+- has one or more TripFares
+- has TripSeats
+- may have TripStops
+
+TripFare:
+- belongs to Trip
+- identifies the applicable class and fare
+
+TripSeat:
+- belongs to Trip
+- references a Seat
+- carries availability state where required
+
+Booking:
+- belongs to a customer/user context as appropriate
+- has passengers
+- has selected seats
+- has payment state
+- has a booking status
 
 Payment:
+- belongs to Booking
+- may have PaymentVerification records
 
-``` text
-id
-booking_id
-method
-amount
-status
-submitted_at
-verified_at
-verified_by
-timestamps
-```
-
-PaymentVerification:
-
-``` text
-id
-payment_id
-admin_id
-decision
-note
-created_at
-```
-
-Flow:
-
-``` text
-I Have Paid
-↓
-Waiting Verification
-↓
-Admin Review
-├── Approve → Confirmed
-└── Reject → Rejected
-```
-
-Tidak ada payment gateway MVP.
-
-------------------------------------------------------------------------
-
-# 22. PaymentVerificationService
-
-Tanggung jawab: - authorize verifier; - validate payment; -
-approve/reject; - update booking; - create audit log; - notify customer.
-
-Approval tidak boleh berasal dari frontend.
-
-------------------------------------------------------------------------
-
-# 23. TicketService
-
-Ticket hanya dibuat untuk booking Confirmed.
-
-Data: - booking code; - passenger; - route; - schedule; -
-service/class; - seat; - payment state; - QR/ticket identifier; -
-boarding information.
-
-------------------------------------------------------------------------
-
-# 24. SupportSession
-
-Fields:
-
-``` text
-id
-customer_id nullable
-guest_identifier nullable
-booking_id nullable
-topic
-status
-assigned_admin_id nullable
-created_at
-accepted_at
-resolved_at
-closed_at
-```
-
-Status: - WAITING; - ACTIVE; - RESOLVED; - CLOSED.
-
-------------------------------------------------------------------------
-
-# 25. SupportMessage
-
-Fields:
-
-``` text
-id
-support_session_id
-sender_type
-sender_id nullable
-message
-created_at
-```
-
-Rule: - WAITING = queue; - ACTIVE = sedang ditangani; - RESOLVED =
-selesai; - CLOSED = ditutup.
-
-------------------------------------------------------------------------
-
-# 26. Notification
-
-Fields:
-
-``` text
-id
-recipient_id
-type
-title
-payload
-reference_type
-reference_id
-read_at
-created_at
-```
-
-Events: - new Help; - payment verification; - trip delay; - fleet
-issue; - maintenance; - booking exception.
-
-Realtime boleh menggunakan broadcasting/WebSocket jika infrastructure
-tersedia. Polling adalah fallback.
-
-------------------------------------------------------------------------
-
-# 27. Tracking
-
-MVP menggunakan simulation.
-
-TrackingPosition:
-
-``` text
-id
-trip_id
-latitude
-longitude
-recorded_at
-source
-is_simulated
-```
-
-Arsitektur masa depan:
-
-``` text
-GPS / Device / API
-↓
-TrackingService
-↓
-Application
-↓
-Customer UI
-```
-
-UI jangan terikat langsung pada provider GPS.
-
-------------------------------------------------------------------------
-
-# 28. Fleet Issue
+SupportSession:
+- belongs to a customer context
+- has SupportMessages
+- has lifecycle status
 
 BusIssue:
+- references a Bus and optionally a Seat/Trip context
+- can have maintenance resolution records
 
-``` text
-id
-bus_id
-reporter/customer reference
-category
-description
-severity
-status
-manufacturer_reference
-timestamps
-```
+## 4. Database Principles
 
-Status:
+Use relational integrity:
+- foreign keys;
+- unique constraints where business rules require uniqueness;
+- indexes for frequent lookup paths;
+- nullable fields only when absence has a defined meaning.
 
-``` text
-Reported
-↓
-Verified
-↓
-Manufacturer Notified
-↓
-Under Repair
-↓
-Resolved
-```
+Avoid storing duplicated business facts when they can be derived safely.
 
-Tidak perlu manufacturer API pada MVP.
+However, preserve historical transaction facts where necessary. For example, a booking should retain the fare/seat information required to reproduce the customer's purchased ticket even if catalog data changes later.
 
-------------------------------------------------------------------------
+## 5. Booking Integrity
 
-# 29. MaintenanceRecord
+Seat availability is not controlled by the frontend.
 
-Fields:
+The backend must:
+1. validate the trip;
+2. validate the requested seats;
+3. verify current availability;
+4. create/update booking records transactionally;
+5. prevent ordinary double-booking races;
+6. return an authoritative result.
 
-``` text
-id
-bus_id
-type
-description
-scheduled_at
-started_at
-completed_at
-status
-notes
-timestamps
-```
+Use appropriate database transactions and locking/unique constraints where needed.
 
-Trip creation wajib memvalidasi operational status bus.
+Do not rely on JavaScript-only checks.
 
-------------------------------------------------------------------------
+## 6. Pricing Integrity
 
-# 30. Authorization
+Trip pricing is backend data.
 
-Roles: - Super Admin; - Operations; - Customer Support; - Finance.
+Frontend:
+- requests/displays;
+- does not calculate authoritative totals.
 
-Gunakan: - middleware; - policies; - gates/permissions.
+Backend:
+- determines applicable fare;
+- validates totals;
+- persists transaction facts.
 
-Menyembunyikan tombol pada frontend bukan authorization.
+## 7. Payment Integrity
 
-------------------------------------------------------------------------
+Payment gateway is out of current scope.
 
-# 31. Controllers
+Payment verification should be represented as application state.
 
-Struktur:
+Suggested lifecycle:
+- pending
+- submitted
+- approved
+- rejected
+- expired
+- cancelled
 
-``` text
-app/
-├── Http/
-│   ├── Controllers/
-│   │   ├── Customer/
-│   │   └── Admin/
-│   ├── Requests/
-│   └── Middleware/
-├── Models/
-├── Services/
-├── Policies/
-└── Notifications/
-```
+Use only states actually required by the implementation.
 
-Controller: 1. authorize; 2. validate; 3. call service; 4. return
-response/view.
+## 8. Support Architecture
 
-------------------------------------------------------------------------
+Support session lifecycle:
+- pending
+- active
+- closed
 
-# 32. Frontend Components
+Notification is created when a new customer session requires admin attention.
 
-Customer: - Navbar; - Footer; - BookingWidget; - Button; - Input; -
-Select; - TripCard; - ClassCard; - RouteCard; - StatusBadge; - Seat; -
-BookingSummary; - Notification; - LoadingState; - EmptyState; -
-ErrorState.
+Messages should belong to a session and have clear sender identity/type.
 
-Admin: - Sidebar; - Topbar; - KPICard; - DataTable; - FilterBar; -
-ChatPanel; - NotificationPanel; - ConfirmationModal; - StatusBadge.
+## 9. Tracking Architecture
 
-------------------------------------------------------------------------
+TrackingPosition is optional/future-facing.
 
-# 33. Homepage Component Tree
+If implemented without an external GPS provider, the application must not imply that sample coordinates are live.
 
-``` text
+Prefer explicit source/status fields when a prototype needs to distinguish:
+- live;
+- simulated;
+- manually updated.
+
+## 10. Fleet Issue Architecture
+
+BusIssue should support:
+- issue category;
+- description;
+- severity;
+- bus;
+- optional seat;
+- optional trip;
+- lifecycle status;
+- timestamps.
+
+MaintenanceRecord can store:
+- action;
+- diagnosis;
+- resolution;
+- responsible party;
+- status;
+- timestamps.
+
+Manufacturer integration remains an abstraction boundary, not a fake API.
+
+## 11. Controllers / Services
+
+Controllers should remain thin.
+
+Typical responsibilities:
+- receive validated input;
+- authorize;
+- call domain/application logic;
+- return response.
+
+Complex operations such as booking creation may use dedicated service/action classes.
+
+Do not create service classes solely to wrap trivial Eloquent calls.
+
+## 12. Authorization
+
+Use Laravel's authorization mechanisms:
+- policies;
+- gates;
+- middleware;
+- role/permission checks where required.
+
+Do not rely on hidden UI buttons for security.
+
+## 13. Frontend / Backend Boundary
+
+Frontend handles:
+- presentation;
+- interaction;
+- client-side convenience validation;
+- loading/error states.
+
+Backend handles:
+- validation;
+- authorization;
+- business rules;
+- authoritative pricing;
+- inventory;
+- booking;
+- payment state.
+
+## 14. Homepage Component Tree
+
+Conceptually:
+
 Home
 ├── Navbar
 ├── Hero
@@ -697,76 +291,61 @@ Home
 │   ├── BusImage
 │   └── Content
 └── Footer
-```
 
-Tidak ada homepage marketing component lain.
+The widget must visually overlap the Hero/next-section boundary.
 
-------------------------------------------------------------------------
+## 15. Security
 
-# 34. Homepage Overlap Architecture
+Apply:
+- server-side validation;
+- CSRF protection;
+- authorization;
+- mass-assignment protection;
+- output escaping;
+- secure authentication practices;
+- rate limiting where appropriate;
+- safe file upload handling if uploads are later added.
 
-Jangan sekadar menambahkan negative margin.
+Never expose secrets in code, views, JavaScript, or documentation.
 
-Struktur konseptual:
+## 16. Testing Architecture
 
-``` text
-Hero
-↓
-Overlap Layer
-↓
-BookingWidget
-↓
-Reserved Spacing
-↓
-ImportantTravelNotes
-```
+Prefer:
+- feature tests for user-visible flows;
+- unit tests for isolated domain logic;
+- database assertions for persistence;
+- authorization tests for protected operations.
 
-Reserved spacing harus menyesuaikan tinggi widget pada breakpoint
-berbeda.
+Critical areas:
+- search;
+- fare calculation/selection;
+- seat availability;
+- booking creation;
+- double-booking prevention;
+- payment verification;
+- support lifecycle;
+- authorization.
 
-Z-index harus menggunakan stacking context yang jelas dan angka
-terkontrol.
+## 17. Migration Safety
 
-------------------------------------------------------------------------
+Never use `migrate:fresh` or destructive resets as routine development shortcuts.
 
-# 35. Database Integrity
+Before migration changes:
+- inspect current migrations;
+- inspect current schema;
+- preserve data;
+- run targeted migration verification.
 
-Wajib: - foreign keys; - unique constraints; - indexes; -
-transactions; - timestamps; - explicit state rules.
+## 18. Architecture Evolution
 
-Index penting: - booking_code; - trip route/date; - trip_seat
-trip/status; - payment status; - support status; - notification
-recipient/read.
+The architecture should evolve from actual requirements.
 
-------------------------------------------------------------------------
+Do not prematurely introduce:
+- microservices;
+- event buses everywhere;
+- queues for trivial tasks;
+- external APIs;
+- repositories for every model;
+- complex state machines without need.
 
-# 36. ActivityLog
-
-Catat: - payment approve/reject; - refund; - trip cancellation; - fare
-change; - bus assignment; - support accept/close; - fleet issue
-update; - admin permission change.
-
-Minimal: - actor; - action; - entity; - entity ID; - metadata; -
-timestamp.
-
-------------------------------------------------------------------------
-
-# 37. Security
-
-Wajib: - CSRF; - server-side validation; - authorization; - password
-hashing; - rate limiting; - escaped output; - protected admin routes; -
-secure sessions; - no secrets in Git; - safe errors.
-
-Jangan expose: - SQL; - stack trace; - credentials; - API keys; -
-internal paths.
-
-------------------------------------------------------------------------
-
-# 38. Architecture Boundary
-
-Jangan implement real: - GPS; - manufacturer API; - payment gateway; -
-external pricing API,
-
-sebelum ada requirement eksplisit.
-
-Buat service boundary agar integrasi masa depan mudah.
+Complexity must have a concrete reason.
