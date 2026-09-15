@@ -1,6 +1,10 @@
 <?php
 
-// 1. Buat direktori sementara di sistem Vercel (/tmp)
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
+// 1. Buat direktori sementara di Vercel (/tmp) jika belum ada
 $dirs = [
     '/tmp/views',
     '/tmp/cache',
@@ -14,12 +18,28 @@ foreach ($dirs as $dir) {
     }
 }
 
-// 2. Arahkan variabel cache Laravel ke /tmp
-putenv('VIEW_COMPILED_PATH=/tmp/views');
-putenv('APP_SERVICES_CACHE=/tmp/cache/services.php');
-putenv('APP_PACKAGES_CACHE=/tmp/cache/packages.php');
-putenv('APP_CONFIG_CACHE=/tmp/cache/config.php');
-putenv('APP_ROUTES_CACHE=/tmp/cache/routes.php');
+// 2. Pasang nilai bawaan (fallback) agar driver tidak bernilai kosong/null
+$defaultEnvs = [
+    'VIEW_COMPILED_PATH' => '/tmp/views',
+    'APP_SERVICES_CACHE' => '/tmp/cache/services.php',
+    'APP_PACKAGES_CACHE' => '/tmp/cache/packages.php',
+    'APP_CONFIG_CACHE' => '/tmp/cache/config.php',
+    'APP_ROUTES_CACHE' => '/tmp/cache/routes.php',
+    'SESSION_DRIVER' => 'cookie',
+    'CACHE_STORE' => 'array',
+    'LOG_CHANNEL' => 'stderr',
+    'BROADCAST_CONNECTION' => 'log',
+    'QUEUE_CONNECTION' => 'sync',
+    'MAIL_MAILER' => 'log',
+];
+
+foreach ($defaultEnvs as $key => $value) {
+    if (empty(getenv($key))) {
+        putenv("{$key}={$value}");
+        $_ENV[$key] = $value;
+        $_SERVER[$key] = $value;
+    }
+}
 
 // 3. Load Autoload & Bootstrapping Laravel
 require __DIR__ . '/../vendor/autoload.php';
