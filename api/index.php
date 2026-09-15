@@ -18,33 +18,47 @@ foreach ($dirs as $dir) {
     }
 }
 
-// 2. Load Autoload & Bootstrapping Laravel
-require __DIR__ . '/../vendor/autoload.php';
-$app = require_once __DIR__ . '/../bootstrap/app.php';
-
-// 3. Paksa Laravel memakai folder storage /tmp
-$app->useStoragePath('/tmp');
-
-// 4. Override langsung Config Repository Laravel untuk mencegah driver bernilai string kosong ("")
-$config = $app->make('config');
-
-$defaults = [
-    'session.driver'      => 'cookie',
-    'cache.default'       => 'array',
-    'logging.default'     => 'stderr',
-    'database.default'    => 'pgsql',
-    'queue.default'       => 'sync',
-    'broadcasting.default' => 'log',
-    'mail.default'        => 'log',
-];
-
-foreach ($defaults as $key => $fallback) {
-    if (empty($config->get($key))) {
-        $config->set($key, $fallback);
+// 2. Hapus variabel lingkungan bernilai string kosong ("")
+// Mencegah env('KEY', 'default') mengembalikan "" bukannya nilai default
+foreach ([$_ENV, $_SERVER] as $envGroup) {
+    foreach ($envGroup as $key => $value) {
+        if ($value === '' || $value === null) {
+            unset($_ENV[$key]);
+            unset($_SERVER[$key]);
+            putenv($key);
+        }
     }
 }
 
-// 5. Jalankan Aplikasi
+// 3. Pasang variabel environment wajib untuk Serverless Vercel
+$requiredEnvs = [
+    'VIEW_COMPILED_PATH' => '/tmp/views',
+    'APP_SERVICES_CACHE' => '/tmp/cache/services.php',
+    'APP_PACKAGES_CACHE' => '/tmp/cache/packages.php',
+    'APP_CONFIG_CACHE'   => '/tmp/cache/config.php',
+    'APP_ROUTES_CACHE'   => '/tmp/cache/routes.php',
+    'SESSION_DRIVER'     => 'cookie',
+    'CACHE_STORE'        => 'array',
+    'LOG_CHANNEL'        => 'stderr',
+    'DB_CONNECTION'      => 'pgsql',
+];
+
+foreach ($requiredEnvs as $key => $value) {
+    if (empty($_ENV[$key]) && empty($_SERVER[$key])) {
+        $_ENV[$key] = $value;
+        $_SERVER[$key] = $value;
+        putenv("{$key}={$value}");
+    }
+}
+
+// 4. Load Autoload & Bootstrapping Laravel
+require __DIR__ . '/../vendor/autoload.php';
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+
+// 5. Paksa Laravel memakai folder storage /tmp
+$app->useStoragePath('/tmp');
+
+// 6. Jalankan Aplikasi
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
 $response = $kernel->handle(
