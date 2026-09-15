@@ -31,7 +31,7 @@ class SearchTest extends TestCase
 
         $bus = Bus::create([
             'plate_number' => 'S'.rand(1000, 9999).'U',
-            'model_type' => 'ANTIBU_SATSET',
+            'model_type' => 'KSATRIA',
             'status' => 'ACTIVE',
         ]);
 
@@ -126,7 +126,7 @@ class SearchTest extends TestCase
             'destination_id' => $biasaneDest->id,
             'service_category' => 'biasane',
         ]);
-        $biasaneBus = Bus::create(['plate_number' => 'B'.rand(1000, 9999).'S', 'model_type' => 'BIASANE', 'status' => 'ACTIVE']);
+        $biasaneBus = Bus::create(['plate_number' => 'B'.rand(1000, 9999).'S', 'model_type' => 'PLETON', 'status' => 'ACTIVE']);
         Trip::create([
             'route_id' => $biasaneRoute->id,
             'bus_id' => $biasaneBus->id,
@@ -389,7 +389,7 @@ class SearchTest extends TestCase
 
         // Bus model is rendered client-side via Alpine.js, check it in the JSON data
         $content = $response->content();
-        $this->assertStringContainsString('ANTIBU', $content);
+        $this->assertStringContainsString('Ksatria', $content);
         $this->assertStringContainsString('bus_model', $content);
     }
 }

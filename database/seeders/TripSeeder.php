@@ -33,8 +33,8 @@ class TripSeeder extends Seeder
         );
 
         // Buses
-        $busBig = Bus::firstOrCreate(['plate_number' => 'TN-001'], ['model_type' => 'ANTIBU_SATSET', 'status' => 'IDLE']);
-        $busSmall = Bus::firstOrCreate(['plate_number' => 'TN-002'], ['model_type' => 'BIASANE', 'status' => 'IDLE']);
+        $busBig = Bus::firstOrCreate(['plate_number' => 'TN-001'], ['model_type' => 'KSATRIA', 'status' => 'IDLE']);
+        $busSmall = Bus::firstOrCreate(['plate_number' => 'TN-002'], ['model_type' => 'PLETON', 'status' => 'IDLE']);
 
         // Trips with seats + fares
         $this->createTrip($antibu, $busBig, Carbon::now()->addDays(2)->setTime(8, 0), Carbon::now()->addDays(2)->setTime(21, 30));
@@ -55,8 +55,8 @@ class TripSeeder extends Seeder
         $allowedClasses = BusSeatTemplate::allowedClasses($bus->model_type);
 
         // Fares per class
-        $fareMap = match ($bus->model_type->value) {
-            'ANTIBU_SATSET' => ['Sukian' => 195000, 'SukianPlus' => 285000, 'SukianPro' => 420000],
+        $fareMap = match ($bus->model_type->resolve()) {
+            BusModelType::KSATRIA => ['Sukian' => 195000, 'SukianPlus' => 285000, 'SukianPro' => 420000],
             default => ['Sukian' => 150000, 'SukianPlus' => 220000],
         };
 

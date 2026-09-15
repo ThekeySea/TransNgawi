@@ -31,8 +31,8 @@ class AdminManagementTest extends TestCase
         $antibu = Route::create(['origin_id' => $capitalA->id, 'destination_id' => $capitalB->id, 'service_category' => 'antibu']);
         $biasane = Route::create(['origin_id' => $townA->id, 'destination_id' => $townB->id, 'service_category' => 'biasane']);
 
-        $smallBus = Bus::create(['plate_number' => 'ADM-40', 'model_type' => 'BIASANE', 'status' => 'IDLE']);
-        $bigBus = Bus::create(['plate_number' => 'ADM-30', 'model_type' => 'ANTIBU_SATSET', 'status' => 'IDLE']);
+        $smallBus = Bus::create(['plate_number' => 'ADM-40', 'model_type' => 'PLETON', 'status' => 'IDLE']);
+        $bigBus = Bus::create(['plate_number' => 'ADM-30', 'model_type' => 'KSATRIA', 'status' => 'IDLE']);
 
         return compact('capitalA', 'capitalB', 'townA', 'townB', 'antibu', 'biasane', 'smallBus', 'bigBus');
     }
@@ -92,7 +92,7 @@ class AdminManagementTest extends TestCase
         ])->assertSessionHasErrors('model_type');
 
         $this->actingAs($admin)->post('/admin/buses', [
-            'plate_number' => 'ADM-001', 'model_type' => 'BIASANE', 'status' => 'IDLE',
+            'plate_number' => 'ADM-001', 'model_type' => 'PLETON', 'status' => 'IDLE',
         ])->assertRedirect(route('admin.buses.index'));
         $this->assertDatabaseHas('buses', ['plate_number' => 'ADM-001']);
     }
@@ -199,7 +199,7 @@ class AdminManagementTest extends TestCase
         $trip = Trip::first();
         $this->assertCount(3, $trip->fares);
         $this->assertCount(30, $trip->seats);
-        $this->assertEquals(9, $trip->seats()->where('class_name', 'SukianPro')->count());
+        $this->assertEquals(8, $trip->seats()->where('class_name', 'SukianPro')->count());
     }
 
     public function test_wizard_steps_cannot_be_skipped(): void
@@ -313,7 +313,7 @@ class AdminManagementTest extends TestCase
         ['biasane' => $route, 'smallBus' => $idleBus] = $this->seedCatalog();
         $admin = $this->admin();
 
-        $maintenanceBus = Bus::create(['plate_number' => 'MNT-01', 'model_type' => 'BIASANE', 'status' => 'MAINTENANCE']);
+        $maintenanceBus = Bus::create(['plate_number' => 'MNT-01', 'model_type' => 'PLETON', 'status' => 'MAINTENANCE']);
 
         $this->actingAs($admin)->post('/admin/trips/create/step-1', ['service_category' => 'biasane']);
         $this->actingAs($admin)->post('/admin/trips/create/step-2', ['route_id' => $route->id]);
@@ -753,7 +753,7 @@ class AdminManagementTest extends TestCase
         $admin = $this->admin();
 
         // Create a second bus of same model (BIASANE)
-        $secondBus = Bus::create(['plate_number' => 'ADM-40B', 'model_type' => 'BIASANE', 'status' => 'IDLE']);
+        $secondBus = Bus::create(['plate_number' => 'ADM-40B', 'model_type' => 'PLETON', 'status' => 'IDLE']);
 
         // Create trip with first bus → becomes ACTIVE
         $this->actingAs($admin)->post('/admin/trips/create/step-1', ['service_category' => 'biasane']);
@@ -1083,7 +1083,7 @@ class AdminManagementTest extends TestCase
         $origin = Location::create(['name' => 'Surabaya', 'is_important' => true]);
         $dest = Location::create(['name' => 'Cilegon', 'is_important' => true]);
         $route = Route::create(['origin_id' => $origin->id, 'destination_id' => $dest->id, 'service_category' => 'satset']);
-        $bus = Bus::create(['plate_number' => 'SAT-01', 'model_type' => 'ANTIBU_SATSET', 'status' => 'IDLE']);
+        $bus = Bus::create(['plate_number' => 'SAT-01', 'model_type' => 'KSATRIA', 'status' => 'IDLE']);
 
         $originSp = $origin->stopPoints()->create(['name' => 'Terminal', 'is_important_point' => false]);
         $destSp = $dest->stopPoints()->create(['name' => 'Pelabuhan', 'is_important_point' => true]);
@@ -1115,7 +1115,7 @@ class AdminManagementTest extends TestCase
         $origin = Location::create(['name' => 'Surabaya', 'is_important' => true]);
         $dest = Location::create(['name' => 'Cilegon', 'is_important' => true]);
         $route = Route::create(['origin_id' => $origin->id, 'destination_id' => $dest->id, 'service_category' => 'satset']);
-        $bus = Bus::create(['plate_number' => 'SAT-02', 'model_type' => 'ANTIBU_SATSET', 'status' => 'IDLE']);
+        $bus = Bus::create(['plate_number' => 'SAT-02', 'model_type' => 'KSATRIA', 'status' => 'IDLE']);
 
         $originSp = $origin->stopPoints()->create(['name' => 'Bandara', 'is_important_point' => true]);
         $destSp = $dest->stopPoints()->create(['name' => 'Pelabuhan', 'is_important_point' => true]);
@@ -1149,7 +1149,7 @@ class AdminManagementTest extends TestCase
         $origin = Location::create(['name' => 'Surabaya', 'is_important' => true]);
         $dest = Location::create(['name' => 'Cilegon', 'is_important' => true]);
         $route = Route::create(['origin_id' => $origin->id, 'destination_id' => $dest->id, 'service_category' => 'satset']);
-        $bus = Bus::create(['plate_number' => 'SAT-03', 'model_type' => 'ANTIBU_SATSET', 'status' => 'IDLE']);
+        $bus = Bus::create(['plate_number' => 'SAT-03', 'model_type' => 'KSATRIA', 'status' => 'IDLE']);
 
         $originSp = $origin->stopPoints()->create(['name' => 'Bandara', 'is_important_point' => true]);
         $destSp = $dest->stopPoints()->create(['name' => 'Pelabuhan', 'is_important_point' => true]);
@@ -1200,5 +1200,147 @@ class AdminManagementTest extends TestCase
         $response->assertSee('Terminal A');
         $response->assertSee('Halte B');
         $response->assertSee('Terminal C');
+    }
+
+    // ── Seat Toggle (Maintenance) Tests ───────────────────────────────
+
+    public function test_toggle_seat_to_blocked_persists_in_db(): void
+    {
+        ['biasane' => $route, 'smallBus' => $bus] = $this->seedCatalog();
+        $admin = $this->admin();
+
+        // Create trip with seats
+        $this->actingAs($admin)->post('/admin/trips/create/step-1', ['service_category' => 'biasane']);
+        $this->actingAs($admin)->post('/admin/trips/create/step-2', ['route_id' => $route->id]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-3', [
+            'bus_id' => $bus->id,
+            'departs_at' => now()->addDays(2)->format('Y-m-d H:i'),
+            'arrives_at' => now()->addDays(3)->format('Y-m-d H:i'),
+        ]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-4', [
+            'fares' => ['Sukian' => 195000, 'SukianPlus' => 285000],
+        ]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-5', []);
+
+        $trip = Trip::first();
+        $seat = $trip->seats()->where('status', \App\Enums\TripSeatStatus::AVAILABLE)->first();
+
+        // Toggle to BLOCKED
+        $this->actingAs($admin)->patch(
+            route('admin.trip-seats.toggle', $seat->id)
+        )->assertRedirect();
+
+        // Verify DB persistence
+        $this->assertDatabaseHas('trip_seats', [
+            'trip_id' => $trip->id,
+            'seat_code' => $seat->seat_code,
+            'status' => 'BLOCKED',
+            'is_damaged' => true,
+        ]);
+    }
+
+    public function test_toggle_seat_back_to_available_persists_in_db(): void
+    {
+        ['biasane' => $route, 'smallBus' => $bus] = $this->seedCatalog();
+        $admin = $this->admin();
+
+        // Create trip
+        $this->actingAs($admin)->post('/admin/trips/create/step-1', ['service_category' => 'biasane']);
+        $this->actingAs($admin)->post('/admin/trips/create/step-2', ['route_id' => $route->id]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-3', [
+            'bus_id' => $bus->id,
+            'departs_at' => now()->addDays(2)->format('Y-m-d H:i'),
+            'arrives_at' => now()->addDays(3)->format('Y-m-d H:i'),
+        ]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-4', [
+            'fares' => ['Sukian' => 195000, 'SukianPlus' => 285000],
+        ]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-5', []);
+
+        $trip = Trip::first();
+        $seat = $trip->seats()->where('status', \App\Enums\TripSeatStatus::AVAILABLE)->first();
+
+        // First toggle to BLOCKED
+        $this->actingAs($admin)->patch(
+            route('admin.trip-seats.toggle', $seat->id)
+        )->assertRedirect();
+
+        // Then toggle back to AVAILABLE
+        $this->actingAs($admin)->patch(
+            route('admin.trip-seats.toggle', $seat->id)
+        )->assertRedirect();
+
+        // Verify DB revert
+        $this->assertDatabaseHas('trip_seats', [
+            'trip_id' => $trip->id,
+            'seat_code' => $seat->seat_code,
+            'status' => 'AVAILABLE',
+            'is_damaged' => false,
+        ]);
+    }
+
+    public function test_sold_seat_cannot_be_toggled_to_blocked(): void
+    {
+        ['biasane' => $route, 'smallBus' => $bus] = $this->seedCatalog();
+        $admin = $this->admin();
+
+        // Create trip
+        $this->actingAs($admin)->post('/admin/trips/create/step-1', ['service_category' => 'biasane']);
+        $this->actingAs($admin)->post('/admin/trips/create/step-2', ['route_id' => $route->id]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-3', [
+            'bus_id' => $bus->id,
+            'departs_at' => now()->addDays(2)->format('Y-m-d H:i'),
+            'arrives_at' => now()->addDays(3)->format('Y-m-d H:i'),
+        ]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-4', [
+            'fares' => ['Sukian' => 195000, 'SukianPlus' => 285000],
+        ]);
+        $this->actingAs($admin)->post('/admin/trips/create/step-5', []);
+
+        $trip = Trip::first();
+        $seat = $trip->seats()->first();
+        $seat->update(['status' => \App\Enums\TripSeatStatus::SOLD]);
+
+        $this->actingAs($admin)->patch(
+            route('admin.trip-seats.toggle', $seat->id)
+        )->assertRedirect();
+
+        // Verify seat is still SOLD
+        $this->assertDatabaseHas('trip_seats', [
+            'trip_id' => $trip->id,
+            'seat_code' => $seat->seat_code,
+            'status' => 'SOLD',
+        ]);
+    }
+
+    public function test_customer_sees_blocked_seats_as_separate_from_occupied(): void
+    {
+        ['biasane' => $route, 'smallBus' => $bus] = $this->seedCatalog();
+
+        $service = app(\App\Services\TripCreationService::class);
+        $trip = $service->create([
+            'service_category' => 'biasane',
+            'route_id' => $route->id,
+            'bus_id' => $bus->id,
+            'departs_at' => now()->addDays(2)->format('Y-m-d H:i'),
+            'arrives_at' => now()->addDays(3)->format('Y-m-d H:i'),
+            'fares' => ['Sukian' => 195000, 'SukianPlus' => 285000],
+        ]);
+
+        $sukianSeats = $trip->seats()->where('class_name', 'Sukian')->get();
+        $blockedSeat = $sukianSeats->first();
+        $blockedSeat->update(['status' => \App\Enums\TripSeatStatus::BLOCKED, 'is_damaged' => true]);
+
+        $soldSeat = $sukianSeats->where('id', '!=', $blockedSeat->id)->first();
+        $soldSeat->update(['status' => \App\Enums\TripSeatStatus::SOLD]);
+
+        $response = $this->get(route('perjalanan.show', $trip));
+        $response->assertOk();
+
+        // Page renders: BLOCKED seat should appear as "maintenance" (red), SOLD as "occupied" (gray)
+        $response->assertSee($blockedSeat->seat_code);
+        $response->assertSee($soldSeat->seat_code);
+        $response->assertSee('seat-icon--blocked');
+        $response->assertSee('seat-icon--occupied');
     }
 }

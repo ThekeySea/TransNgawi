@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\LocationController as AdminLocationController;
 use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
 use App\Http\Controllers\Admin\AdminRouteController as AdminRouteController;
 use App\Http\Controllers\Admin\TripController as AdminTripController;
+use App\Http\Controllers\Admin\TripSeatController as AdminTripSeatController;
 use App\Http\Controllers\Admin\TripWizardController as AdminTripWizardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,7 @@ Route::get('/perjalanan', [SearchController::class, 'index'])->name('perjalanan.
 
 Route::get('/trips/{trip}', [TripController::class, 'show'])->name('trips.show');
 Route::get('/perjalanan/{trip}', [TripController::class, 'show'])->name('perjalanan.show');
+Route::get('/perjalanan/{trip}/seat-statuses', [TripController::class, 'seatStatuses'])->name('perjalanan.seat-statuses');
 
 // Seat selection (trip-based)
 Route::get('/trips/{trip}/seats', [BookingController::class, 'seats'])->name('booking.seats');
@@ -79,6 +81,9 @@ Route::get('/help/{session}', [HelpController::class, 'show'])->name('help.show'
 Route::post('/help/{session}/reply', [HelpController::class, 'reply'])->name('help.reply');
 
 Route::get('/profile', [CustomerProfileController::class, 'index'])->middleware('auth')->name('profile.index');
+Route::patch('/profile', [CustomerProfileController::class, 'update'])->middleware('auth')->name('profile.update');
+Route::get('/profile/password', [CustomerProfileController::class, 'passwordForm'])->middleware('auth')->name('profile.password');
+Route::put('/profile/password', [CustomerProfileController::class, 'passwordUpdate'])->middleware('auth')->name('profile.password.update');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -109,6 +114,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/trips/{trip}/edit', [AdminTripController::class, 'edit'])->name('trips.edit');
     Route::put('/trips/{trip}', [AdminTripController::class, 'update'])->name('trips.update');
     Route::delete('/trips/{trip}', [AdminTripController::class, 'destroy'])->name('trips.destroy');
+    Route::get('/trips/{trip}/seats', [AdminTripController::class, 'seats'])->name('trips.seats');
+    Route::patch('/trip-seats/{seat}/toggle-maintenance', [AdminTripSeatController::class, 'toggleMaintenance'])->name('trip-seats.toggle');
 
     // Analisa
     Route::get('/analisa', [AdminAnalisaController::class, 'index'])->name('analisa.index');
@@ -129,7 +136,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 

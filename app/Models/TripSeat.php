@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['trip_id', 'seat_code', 'class_name', 'status', 'hold_expires_at', 'held_by_booking_id'])]
+#[Fillable(['trip_id', 'seat_code', 'class_name', 'status', 'is_damaged', 'hold_expires_at', 'held_by_booking_id'])]
 class TripSeat extends Model
 {
     protected function casts(): array
     {
         return [
             'status' => TripSeatStatus::class,
+            'is_damaged' => 'boolean',
             'hold_expires_at' => 'datetime',
         ];
     }

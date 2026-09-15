@@ -23,6 +23,10 @@ class BookingController extends Controller
             'status' => $s->status->value,
         ])->toArray();
 
+        $seatStatuses = $trip->seats->pluck('status', 'seat_code')
+            ->map(fn ($s) => is_string($s) ? $s : $s->value)
+            ->toArray();
+
         $occupied = $trip->seats
             ->whereIn('status', ['HELD', 'SOLD', 'BLOCKED'])
             ->pluck('seat_code')
@@ -32,6 +36,7 @@ class BookingController extends Controller
             'trip' => $trip,
             'seats' => $seats,
             'occupied' => $occupied,
+            'seatStatuses' => $seatStatuses,
             'busModel' => $trip->bus->model_type->value,
         ]);
     }

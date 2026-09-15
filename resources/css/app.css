@@ -112,4 +112,258 @@
         10% { opacity: 1; }
         100% { offset-distance: 100%; opacity: 1; }
     }
+
+    /* ══════════════════════════════════════════════
+       BUS SEAT MAP — Realistic Cabin Layout
+       ══════════════════════════════════════════════ */
+
+    .bus-cabin {
+        @apply relative mx-auto w-full max-w-[340px] overflow-hidden rounded-[20px];
+        background: linear-gradient(180deg, #f0efed 0%, #e8e7e5 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.6),
+            0 1px 3px rgb(0 0 0 / 0.06),
+            0 6px 20px rgb(0 0 0 / 0.08);
+        border: 1.5px solid #d4d3d0;
+    }
+
+    .bus-windshield {
+        @apply flex h-6 items-center justify-end px-3;
+        background: linear-gradient(180deg, #d6d5d2 0%, #e8e7e5 100%);
+        border-bottom: 1px solid #ccc;
+    }
+
+    .bus-driver {
+        @apply flex items-center justify-end border-b border-dashed border-neutral-300/60 px-4 py-2;
+    }
+
+    .driver-wheel {
+        @apply h-6 w-6 text-neutral-400;
+    }
+
+    .bus-rear {
+        @apply h-2;
+        background: linear-gradient(180deg, #d4d3d0, #c5c4c1);
+        border-radius: 0 0 18px 18px;
+    }
+
+    /* ── Seat Row ── */
+
+    .seat-row {
+        @apply flex items-center justify-center gap-[5px] px-3 py-[3px];
+    }
+
+    .row-num {
+        @apply flex h-5 w-4 flex-shrink-0 items-center justify-center text-[9px] font-bold text-neutral-400;
+    }
+
+    .aisle-wide {
+        @apply w-5 flex-shrink-0;
+    }
+
+    .section-divider {
+        @apply mx-4 border-b border-dashed border-neutral-300/50;
+    }
+
+    /* ── Seat Icon (Base) ── */
+
+    .seat-icon {
+        @apply relative flex h-[42px] w-[38px] flex-shrink-0 cursor-pointer items-center justify-center rounded-lg transition-all;
+        border: 1.5px solid transparent;
+    }
+
+    .seat-icon:hover:not(:disabled):not(.seat-icon--occupied):not(.seat-icon--selected):not([class*="preview"]) {
+        @apply -translate-y-0.5;
+        box-shadow: 0 3px 8px rgb(0 0 0 / 0.12);
+    }
+
+    .seat-icon:disabled {
+        @apply cursor-not-allowed;
+    }
+
+    .seat-icon .seat-svg {
+        @apply h-7 w-7;
+    }
+
+    /* ── Seater Seats (Sukian / SukianPlus) ── */
+
+    .seat-icon--sukian {
+        background: rgba(167, 243, 208, 0.15);
+        border-color: #6EE7B7;
+    }
+
+    .seat-icon--sukianplus {
+        background: rgba(147, 197, 253, 0.15);
+        border-color: #93C5FD;
+    }
+
+    /* ── Sleeper Pod (SukianPro) ── */
+
+    .seat-icon--sukianpro {
+        @apply h-[48px] w-[34px];
+        background: rgba(196, 181, 253, 0.15);
+        border-color: #C4B5FD;
+        border-radius: 8px;
+    }
+
+    .seat-icon--sukianpro .seat-svg {
+        @apply h-8 w-6;
+    }
+
+    .seat-icon .seat-svg--wide {
+        @apply h-7 w-8;
+    }
+
+    /* ── Occupied State (SOLD / HELD only — gray) ── */
+
+    .seat-icon--occupied {
+        @apply cursor-not-allowed opacity-60;
+        border-color: #C4C5C3 !important;
+        background: rgba(209, 213, 219, 0.15) !important;
+    }
+
+    /* ── Blocked State (RED — must override occupied) ── */
+
+    .seat-icon--blocked {
+        border-color: #B91C1C !important;
+        background: rgba(220, 38, 38, 0.15) !important;
+        cursor: pointer;
+    }
+
+    .seat-icon--blocked.seat-icon--occupied {
+        opacity: 0.85;
+    }
+
+    .seat-icon--blocked .seat-label {
+        @apply font-bold;
+        color: #DC2626;
+    }
+
+    /* ── Held State (AMBER) ── */
+
+    .seat-icon--held {
+        background: rgba(251, 191, 36, 0.2) !important;
+        border-color: #FBBF24 !important;
+        cursor: pointer;
+    }
+
+    .seat-icon--held .seat-label {
+        @apply font-bold;
+    }
+
+    /* ── Sold State (GRAY) ── */
+
+    .seat-icon--sold {
+        background: rgba(107, 114, 128, 0.2) !important;
+        border-color: #6B7280 !important;
+        cursor: pointer;
+    }
+
+    .seat-icon--sold .seat-label {
+        @apply font-bold;
+    }
+
+    /* ── Selected State ── */
+
+    .seat-icon--selected {
+        @apply -translate-y-0.5;
+        background: var(--color-brand) !important;
+        border-color: var(--color-brand) !important;
+        box-shadow: 0 4px 12px rgb(255 117 15 / 0.35);
+    }
+
+    /* ── Seat Label ── */
+
+    .seat-label {
+        @apply absolute -bottom-3 left-0 right-0 text-center text-[8px] font-semibold text-neutral-400 leading-none;
+    }
+
+    .seat-icon--selected .seat-label {
+        color: white;
+    }
+
+    /* ── Customer Blocked Override (unclickable) ── */
+
+    .customer-seat.seat-icon--blocked {
+        @apply cursor-not-allowed opacity-70;
+        pointer-events: none;
+    }
+
+    .customer-seat:disabled {
+        pointer-events: none;
+    }
+
+    /* ── Legend Dots ── */
+
+    .legend-dot {
+        @apply inline-block h-2.5 w-2.5 rounded-sm;
+    }
+
+    .legend-dot--standard {
+        @apply bg-emerald-400;
+    }
+
+    .legend-dot--plus {
+        @apply bg-blue-400;
+    }
+
+    .legend-dot--pro {
+        @apply bg-purple-400;
+    }
+
+    .legend-dot--selected {
+        @apply bg-[#ff750f];
+    }
+
+    .legend-dot--occupied {
+        @apply bg-neutral-300;
+    }
+
+    .legend-dot--blocked {
+        @apply bg-red-500;
+    }
+
+    /* ══════════════════════════════════════════════
+       SEAT TYPE LEGEND TABLE
+       ══════════════════════════════════════════════ */
+
+    .seat-legend {
+        @apply mt-6 overflow-hidden rounded-xl border border-[#e6e6e6] bg-white;
+    }
+
+    .seat-legend-header {
+        @apply border-b border-[#e6e6e6] bg-[#faf9f8] px-4 py-2.5;
+    }
+
+    .seat-legend-row {
+        @apply flex items-center gap-4 border-b border-[#e6e6e6] px-4 py-3 last:border-b-0;
+    }
+
+    .seat-legend-icon {
+        @apply flex w-12 flex-shrink-0 items-center justify-center;
+    }
+
+    .seat-legend-icon svg {
+        @apply h-8 w-8;
+    }
+
+    .seat-legend-info {
+        @apply flex-1;
+    }
+
+    .seat-legend-name {
+        @apply text-sm font-bold text-[#1a1a1a];
+    }
+
+    .seat-legend-features {
+        @apply mt-0.5 flex flex-wrap gap-1.5;
+    }
+
+    .seat-legend-feature {
+        @apply rounded-full bg-[#faf9f8] px-2 py-0.5 text-[10px] font-medium text-[#555555];
+    }
+
+    .seat-legend-status {
+        @apply flex w-16 flex-shrink-0 items-center justify-end;
+    }
 }

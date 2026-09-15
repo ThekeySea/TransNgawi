@@ -74,7 +74,7 @@ class CoreDomainRelationshipsTest extends TestCase
         ]);
         $bus = Bus::create([
             'plate_number' => 'PROTO-001',
-            'model_type' => BusModelType::ANTIBU_SATSET,
+            'model_type' => BusModelType::KSATRIA,
             'status' => 'IDLE',
         ]);
 
@@ -83,7 +83,7 @@ class CoreDomainRelationshipsTest extends TestCase
         $seat = TripSeat::create(['trip_id' => $trip->id, 'seat_code' => 'A1', 'class_name' => 'Sukian']);
         $seat->refresh();
 
-        $this->assertSame(BusModelType::ANTIBU_SATSET, $bus->model_type);
+        $this->assertSame(BusModelType::KSATRIA, $bus->model_type);
         $this->assertSame(TripSeatStatus::AVAILABLE, $seat->status);
         $this->assertTrue($trip->route->is($route));
         $this->assertTrue($trip->bus->is($bus));
@@ -105,7 +105,7 @@ class CoreDomainRelationshipsTest extends TestCase
             ])->id,
             'bus_id' => Bus::create([
                 'plate_number' => 'PROTO-002',
-                'model_type' => BusModelType::BIASANE,
+                'model_type' => BusModelType::PLETON,
                 'status' => 'IDLE',
             ])->id,
         ]);

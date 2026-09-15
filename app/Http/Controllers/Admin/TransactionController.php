@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\TripSeatStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\TripSeat;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
 
@@ -54,6 +56,14 @@ class TransactionController extends Controller
         $booking->update([
             'status' => 'REJECTED',
         ]);
+
+        TripSeat::where('held_by_booking_id', $booking->id)
+            ->where('status', TripSeatStatus::HELD)
+            ->update([
+                'status' => TripSeatStatus::AVAILABLE,
+                'hold_expires_at' => null,
+                'held_by_booking_id' => null,
+            ]);
 
         return redirect()->route('admin.transactions.show', $booking)
             ->with('status', "Pembayaran {$booking->code} telah ditolak.");

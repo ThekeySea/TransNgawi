@@ -17,13 +17,19 @@ Alpine.data('passengerStepper', (initial = 1, min = 1, max = 4) => ({
 }));
 
 // Seat map component
-Alpine.data('seatMap', (maxSeats = 1, occupiedSeats = []) => ({
+Alpine.data('seatMap', (maxSeats = 1, occupiedSeats = [], blockedSeats = []) => ({
     selected: [],
     occupied: occupiedSeats,
+    blocked: blockedSeats,
     maxSeats,
 
+    init() {
+        // Expose for polling script to update in real-time
+        window.seatMapData = this;
+    },
+
     toggle(seatId) {
-        if (this.isOccupied(seatId)) return;
+        if (this.isOccupied(seatId) || this.isBlocked(seatId)) return;
         if (this.isSelected(seatId)) {
             this.selected = this.selected.filter(s => s !== seatId);
         } else if (this.selected.length < this.maxSeats) {
@@ -37,6 +43,10 @@ Alpine.data('seatMap', (maxSeats = 1, occupiedSeats = []) => ({
 
     isOccupied(seatId) {
         return this.occupied.includes(seatId);
+    },
+
+    isBlocked(seatId) {
+        return this.blocked.includes(seatId);
     },
 }));
 

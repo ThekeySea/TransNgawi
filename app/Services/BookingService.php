@@ -152,7 +152,11 @@ class BookingService
 
             TripSeat::where('held_by_booking_id', $booking->id)
                 ->where('status', TripSeatStatus::HELD)
-                ->update(['status' => TripSeatStatus::SOLD]);
+                ->update([
+                    'status' => TripSeatStatus::SOLD,
+                    'hold_expires_at' => null,
+                    'held_by_booking_id' => null,
+                ]);
         });
     }
 }

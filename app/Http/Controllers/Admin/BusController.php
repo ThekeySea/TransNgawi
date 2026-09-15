@@ -37,7 +37,7 @@ class BusController extends Controller
 
     public function create(): View
     {
-        return view('admin.buses.create', ['modelTypes' => BusModelType::cases()]);
+        return view('admin.buses.create', ['modelTypes' => BusModelType::activeCases()]);
     }
 
     public function store(BusRequest $request): RedirectResponse
@@ -49,7 +49,7 @@ class BusController extends Controller
 
     public function edit(Bus $bus): View
     {
-        return view('admin.buses.edit', ['bus' => $bus, 'modelTypes' => BusModelType::cases()]);
+        return view('admin.buses.edit', ['bus' => $bus, 'modelTypes' => BusModelType::activeCases()]);
     }
 
     public function update(BusRequest $request, Bus $bus): RedirectResponse

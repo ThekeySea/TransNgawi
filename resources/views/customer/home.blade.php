@@ -84,6 +84,83 @@
         </div>
     </section>
 
+    {{-- Tata Cara Pemesanan Tiket --}}
+    <section class="bg-surface py-14 md:py-24">
+        <div class="container-app">
+            <div class="mb-10 text-center md:mb-14">
+                <h2 class="text-2xl font-bold tracking-tight text-text sm:text-3xl md:text-4xl">Tata Cara Pemesanan Tiket</h2>
+                <p class="mx-auto mt-3 max-w-xl text-xs leading-relaxed text-text-muted sm:text-sm md:text-base">Empat langkah mudah memesan tiket perjalanan bersama TransNgawi.</p>
+            </div>
+
+            {{-- Milestone Pipeline --}}
+            <div class="relative mt-12 md:mt-16">
+
+                {{-- Desktop Horizontal Connecting Line --}}
+                <div class="pointer-events-none absolute left-0 right-0 top-5 hidden h-px bg-[#e6e6e6] lg:block"></div>
+                <div class="pointer-events-none absolute top-5 hidden h-0.5 bg-[#ff750f] lg:block" style="left: 12.5%; right: 12.5%;"></div>
+
+                <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+
+                    {{-- Step 1 --}}
+                    <div class="relative flex flex-col text-center lg:text-center">
+                        {{-- Mobile Vertical Line --}}
+                        <div class="pointer-events-none absolute left-5 top-10 h-[calc(100%+2rem)] w-0.5 bg-[#e6e6e6] sm:hidden"></div>
+
+                        <div class="relative z-10 mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#ff750f] text-sm font-bold text-white shadow-md shadow-[#ff750f]/25 lg:mx-auto">01</div>
+                        <div class="card mx-auto flex w-full max-w-[280px] flex-col items-center p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:p-6">
+                            <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff750f]/10">
+                                <svg class="h-5 w-5 text-[#ff750f]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                            </div>
+                            <h3 class="text-sm font-bold text-text sm:text-base">Buat Akun / Login</h3>
+                            <p class="mt-1.5 text-xs leading-relaxed text-text-muted">Daftar atau masuk ke akun TransNgawi untuk kemudahan transaksi, penyimpanan riwayat, dan akses e-tiket.</p>
+                        </div>
+                    </div>
+
+                    {{-- Step 2 --}}
+                    <div class="relative flex flex-col text-center lg:text-center">
+                        <div class="pointer-events-none absolute left-5 top-10 h-[calc(100%+2rem)] w-0.5 bg-[#e6e6e6] sm:hidden"></div>
+
+                        <div class="relative z-10 mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#ff750f] text-sm font-bold text-white shadow-md shadow-[#ff750f]/25 lg:mx-auto">02</div>
+                        <div class="card mx-auto flex w-full max-w-[280px] flex-col items-center p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:p-6">
+                            <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff750f]/10">
+                                <svg class="h-5 w-5 text-[#ff750f]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            </div>
+                            <h3 class="text-sm font-bold text-text sm:text-base">Cari &amp; Pilih Perjalanan</h3>
+                            <p class="mt-1.5 text-xs leading-relaxed text-text-muted">Tentukan rute asal, tujuan, tanggal keberangkatan, serta pilih armada bus favoritmu (Pleton atau Ksatria).</p>
+                        </div>
+                    </div>
+
+                    {{-- Step 3 --}}
+                    <div class="relative flex flex-col text-center lg:text-center">
+                        <div class="pointer-events-none absolute left-5 top-10 h-[calc(100%+2rem)] w-0.5 bg-[#e6e6e6] sm:hidden"></div>
+
+                        <div class="relative z-10 mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#ff750f] text-sm font-bold text-white shadow-md shadow-[#ff750f]/25 lg:mx-auto">03</div>
+                        <div class="card mx-auto flex w-full max-w-[280px] flex-col items-center p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:p-6">
+                            <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff750f]/10">
+                                <svg class="h-5 w-5 text-[#ff750f]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
+                            </div>
+                            <h3 class="text-sm font-bold text-text sm:text-base">Pilih Kursi &amp; Isi Data</h3>
+                            <p class="mt-1.5 text-xs leading-relaxed text-text-muted">Tentukan posisi kursi favorit secara visual pada denah bus interaktif dan lengkapi data penumpang.</p>
+                        </div>
+                    </div>
+
+                    {{-- Step 4 --}}
+                    <div class="relative flex flex-col text-center lg:text-center">
+                        <div class="relative z-10 mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#ff750f] text-sm font-bold text-white shadow-md shadow-[#ff750f]/25 lg:mx-auto">04</div>
+                        <div class="card mx-auto flex w-full max-w-[280px] flex-col items-center p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:p-6">
+                            <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff750f]/10">
+                                <svg class="h-5 w-5 text-[#ff750f]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                            </div>
+                            <h3 class="text-sm font-bold text-text sm:text-base">Bayar &amp; Dapatkan E-Tiket</h3>
+                            <p class="mt-1.5 text-xs leading-relaxed text-text-muted">Selesaikan pembayaran secara instan. E-tiket dengan QR Code akan otomatis terbit untuk ditunjukkan saat boarding.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
     {{-- About CTA Section --}}
     <section class="bg-surface-elevated py-14 md:py-24">
         <div class="container-app">

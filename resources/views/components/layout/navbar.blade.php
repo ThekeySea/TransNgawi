@@ -3,7 +3,7 @@
     x-data="{
         open: false,
         scrolled: false,
-        forceSolid: {{ request()->routeIs('help.index', 'help.show', 'my-trips.index', 'track.show', 'tickets.show') ? 'true' : 'false' }},
+        forceSolid: {{ request()->routeIs('help.index', 'help.show', 'my-trips.index', 'track.show', 'tickets.show', 'profile.*') ? 'true' : 'false' }},
         init() {
             this.updateScrolled();
             window.addEventListener('scroll', () => this.updateScrolled(), { passive: true });
@@ -62,9 +62,35 @@
             {{-- Right Side --}}
             <div class="flex items-center gap-3">
                 @auth
-                    <a href="{{ route('dashboard') }}" class="hidden text-sm font-semibold transition-colors duration-200 hover:text-[#ff750f] sm:inline-flex"
-                        :class="scrolled ? 'text-[#1a1a1a]' : 'text-white/90'"
-                    >Dashboard</a>
+                    <div class="relative" x-data="{ profileOpen: false }">
+                        <button type="button" @click="profileOpen = !profileOpen" class="hidden items-center gap-2 text-sm font-semibold transition-colors duration-200 sm:inline-flex"
+                            :class="scrolled ? 'text-[#1a1a1a] hover:text-[#ff750f]' : 'text-white/90 hover:text-[#ff750f]'"
+                        >
+                            @if (auth()->user()->profile_photo_path)
+                                <img src="{{ auth()->user()->profile_photo_url }}" alt="{{ auth()->user()->name }}" class="h-8 w-8 rounded-full object-cover">
+                            @else
+                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#ff750f]/15 text-xs font-bold text-[#ff750f]">
+                                    {{ auth()->user()->initial }}
+                                </div>
+                            @endif
+                            <span class="max-w-[100px] truncate">{{ auth()->user()->name }}</span>
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="profileOpen" @click.outside="profileOpen = false" x-transition
+                            class="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-[#e6e6e6] bg-white py-1 shadow-lg"
+                        >
+                            <a href="{{ route('profile.index') }}" class="block px-4 py-2 text-sm font-semibold text-[#1a1a1a] hover:bg-[#ff750f]/5 hover:text-[#ff750f]">Profil Saya</a>
+                            <a href="{{ route('my-trips.index') }}" class="block px-4 py-2 text-sm font-semibold text-[#1a1a1a] hover:bg-[#ff750f]/5 hover:text-[#ff750f]">Riwayat Tiket</a>
+                            @if (auth()->user()->role === 'admin')
+                                <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm font-semibold text-[#1a1a1a] hover:bg-[#ff750f]/5 hover:text-[#ff750f]">Dashboard Admin</a>
+                            @endif
+                            <hr class="my-1 border-[#e6e6e6]">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="block w-full px-4 py-2 text-left text-sm font-semibold text-[#1a1a1a] hover:bg-[#ff750f]/5 hover:text-[#ff750f]">Keluar</button>
+                            </form>
+                        </div>
+                    </div>
                 @else
                     <a href="{{ route('login') }}" class="hidden text-sm font-semibold transition-colors duration-200 hover:text-[#ff750f] sm:inline-flex"
                         :class="scrolled ? 'text-[#1a1a1a]' : 'text-white/90'"
@@ -94,8 +120,17 @@
             <a href="{{ route('help.index') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold @if(request()->routeIs('help.index', 'help.show')) bg-[#ff750f]/10 text-[#ff750f] @else text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f] @endif" @click="open = false">Bantuan</a>
             <a href="{{ route('my-trips.index') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold @if(request()->routeIs('my-trips.index')) bg-[#ff750f]/10 text-[#ff750f] @else text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f] @endif" @click="open = false">Lacak Tiket</a>
             @auth
-                <a href="{{ route('dashboard') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f]" @click="open = false">Dashboard</a>
+                <hr class="my-1 border-[#e6e6e6]">
+                <a href="{{ route('profile.index') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f]" @click="open = false">Profil Saya</a>
+                @if (auth()->user()->role === 'admin')
+                    <a href="{{ route('admin.dashboard') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f]" @click="open = false">Dashboard Admin</a>
+                @endif
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-full rounded-[var(--radius-sm)] px-3 py-3 text-left text-base font-semibold text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f]">Keluar</button>
+                </form>
             @else
+                <hr class="my-1 border-[#e6e6e6]">
                 <a href="{{ route('login') }}" class="rounded-[var(--radius-sm)] px-3 py-3 text-base font-semibold text-[#1a1a1a] hover:bg-[#ff750f]/10 hover:text-[#ff750f]" @click="open = false">Masuk</a>
             @endauth
         </nav>

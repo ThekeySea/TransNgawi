@@ -11,8 +11,11 @@ use App\Models\Route;
 use App\Models\Trip;
 use App\Models\TripSeat;
 use App\Support\BusSeatTemplate;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class TripController extends Controller
@@ -138,5 +141,83 @@ class TripController extends Controller
         });
 
         return redirect()->route('admin.trips.index')->with('status', 'Trip berhasil dihapus.');
+    }
+
+    public function seats(Trip $trip): View
+    {
+        $trip->load(['route.origin', 'route.destination', 'bus', 'fares', 'seats']);
+
+        $seats = $trip->seats->map(fn ($s) => [
+            'id' => $s->seat_code,
+            'class' => $s->class_name,
+            'status' => $s->status->value,
+            'is_damaged' => $s->is_damaged,
+        ])->toArray();
+
+        $seatStatuses = $trip->seats->pluck('status', 'seat_code')
+            ->map(fn ($s) => is_string($s) ? $s : $s->value)
+            ->toArray();
+
+        $stats = [
+            'total' => $trip->seats->count(),
+            'available' => $trip->seats->where('status', TripSeatStatus::AVAILABLE)->count(),
+            'held' => $trip->seats->where('status', TripSeatStatus::HELD)->count(),
+            'sold' => $trip->seats->where('status', TripSeatStatus::SOLD)->count(),
+            'blocked' => $trip->seats->where('status', TripSeatStatus::BLOCKED)->count(),
+        ];
+
+        return view('admin.trips.seats', [
+            'trip' => $trip,
+            'seats' => $seats,
+            'seatStatuses' => $seatStatuses,
+            'stats' => $stats,
+            'busModel' => $trip->bus->model_type->value,
+        ]);
+    }
+
+    public function toggleMaintenance(Request $request, Trip $trip, string $seatCode): JsonResponse
+    {
+        $seat = TripSeat::where('trip_id', $trip->id)->where('seat_code', $seatCode)->firstOrFail();
+
+        // Protection: SOLD or HELD seats cannot be toggled
+        if (in_array($seat->status, [TripSeatStatus::SOLD, TripSeatStatus::HELD])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kursi sedang ditahan atau sudah dibeli penumpang, tidak dapat ditandai rusak.',
+            ], 422);
+        }
+
+        $newStatus = $seat->status === TripSeatStatus::BLOCKED
+            ? TripSeatStatus::AVAILABLE
+            : TripSeatStatus::BLOCKED;
+
+        $newIsDamaged = $newStatus === TripSeatStatus::BLOCKED;
+
+        DB::transaction(function () use ($seat, $newStatus, $newIsDamaged) {
+            $seat->update([
+                'status' => $newStatus,
+                'is_damaged' => $newIsDamaged,
+            ]);
+        });
+
+        $seat->refresh();
+
+        Log::info('Seat toggled', [
+            'seat_id' => $seat->id,
+            'seat_code' => $seat->seat_code,
+            'trip_id' => $seat->trip_id,
+            'new_status' => $seat->status->value,
+            'is_damaged' => $seat->is_damaged,
+        ]);
+
+        $label = $newStatus === TripSeatStatus::BLOCKED ? 'ditandai rusak' : 'diperbaiki dan siap digunakan kembali';
+
+        return response()->json([
+            'success' => true,
+            'seat_code' => $seat->seat_code,
+            'new_status' => $seat->status->value,
+            'is_damaged' => $seat->is_damaged,
+            'message' => "Kursi {$seat->seat_code} berhasil {$label}.",
+        ]);
     }
 }

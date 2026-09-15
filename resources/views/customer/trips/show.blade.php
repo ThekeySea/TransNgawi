@@ -96,95 +96,13 @@
                         <div class="card">
                             <div class="card-body">
                                 <h2 class="mb-4 text-base font-bold text-text">Pilih Kursi</h2>
-                                <div x-data="seatMap({{ 4 }}, @js($occupied))" x-effect="selected = $data.selected">
-                                    <div class="mx-auto max-w-sm">
-                                        <p class="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-text-subtle">Depan Bus</p>
-                                        <div class="mb-3 flex justify-center">
-                                            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 text-xs text-text-subtle">🚌</div>
-                                        </div>
-
-                                        @php
-                                            $rows = collect($seats)->groupBy(fn ($s) => $s['id'][0]);
-                                            $colCount = $busModel === 'ANTIBU_SATSET' ? 3 : 4;
-                                            $classSymbols = ['Sukian' => '◻', 'SukianPlus' => '◈', 'SukianPro' => '◆'];
-                                            $classColors = [
-                                                'Sukian' => 'bg-emerald-50 border-emerald-300 text-emerald-700',
-                                                'SukianPlus' => 'bg-blue-50 border-blue-300 text-blue-700',
-                                                'SukianPro' => 'bg-purple-50 border-purple-300 text-purple-700',
-                                            ];
-                                            $seatLookup = collect($seats)->keyBy('id');
-                                        @endphp
-
-                                        <div class="space-y-1.5">
-                                            @foreach ($rows as $rowLabel => $rowSeats)
-                                                <div class="flex items-center justify-center gap-1.5">
-                                                    <span class="w-5 text-center text-[10px] font-bold text-text-subtle">{{ $rowLabel }}</span>
-                                                    @if ($busModel === 'ANTIBU_SATSET')
-                                                        @for ($col = 1; $col <= $colCount; $col++)
-                                                            @php
-                                                                $seatId = $rowLabel . $col;
-                                                                $seatData = $seatLookup->get($seatId);
-                                                                $isOccupied = in_array($seatId, $occupied);
-                                                                $className = $seatData['class'] ?? 'Sukian';
-                                                            @endphp
-                                                            @if ($col === 2)
-                                                                <div class="w-3"></div>
-                                                            @endif
-                                                            <button
-                                                                type="button"
-                                                                @click="toggle('{{ $seatId }}')"
-                                                                :disabled="isOccupied('{{ $seatId }}')"
-                                                                :class="{
-                                                                    'bg-[#ff750f] text-white border-[#ff750f]': isSelected('{{ $seatId }}'),
-                                                                    'bg-neutral-200 text-neutral-500 cursor-not-allowed opacity-60': isOccupied('{{ $seatId }}'),
-                                                                    '{{ $classColors[$className] }}': !isSelected('{{ $seatId }}') && !isOccupied('{{ $seatId }}')
-                                                                }"
-                                                                class="flex h-8 w-8 items-center justify-center rounded border text-[9px] font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff750f] hover:scale-105 disabled:hover:scale-100"
-                                                                aria-label="Kursi {{ $seatId }}{{ $isOccupied ? ' (terisi)' : '' }}"
-                                                                title="{{ $className }}">
-                                                                {{ $seatId }}
-                                                            </button>
-                                                        @endfor
-                                                    @else
-                                                        @for ($col = 1; $col <= $colCount; $col++)
-                                                            @php
-                                                                $seatId = $rowLabel . $col;
-                                                                $seatData = $seatLookup->get($seatId);
-                                                                $isOccupied = in_array($seatId, $occupied);
-                                                                $className = $seatData['class'] ?? 'Sukian';
-                                                            @endphp
-                                                            @if ($col === 3)
-                                                                <div class="w-3"></div>
-                                                            @endif
-                                                            <button
-                                                                type="button"
-                                                                @click="toggle('{{ $seatId }}')"
-                                                                :disabled="isOccupied('{{ $seatId }}')"
-                                                                :class="{
-                                                                    'bg-[#ff750f] text-white border-[#ff750f]': isSelected('{{ $seatId }}'),
-                                                                    'bg-neutral-200 text-neutral-500 cursor-not-allowed opacity-60': isOccupied('{{ $seatId }}'),
-                                                                    '{{ $classColors[$className] }}': !isSelected('{{ $seatId }}') && !isOccupied('{{ $seatId }}')
-                                                                }"
-                                                                class="flex h-8 w-8 items-center justify-center rounded border text-[9px] font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff750f] hover:scale-105 disabled:hover:scale-100"
-                                                                aria-label="Kursi {{ $seatId }}{{ $isOccupied ? ' (terisi)' : '' }}"
-                                                                title="{{ $className }}">
-                                                                {{ $seatId }}
-                                                            </button>
-                                                        @endfor
-                                                    @endif
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-
-                                    <p class="mt-3 text-center text-xs text-text-muted">
-                                        <span x-text="selected.length"></span> dari 4 kursi dipilih
-                                    </p>
-
-                                    <template x-for="seatId in selected" :key="seatId">
-                                        <input type="hidden" name="seats[]" :value="seatId">
-                                    </template>
-                                </div>
+                                <x-booking.seat-map
+                                    :seats="$seats"
+                                    :occupied="$occupied"
+                                    :seatStatuses="$seatStatuses"
+                                    :maxSeats="4"
+                                    :busModel="$busModel"
+                                />
                             </div>
                         </div>
 
@@ -226,6 +144,7 @@
                                     <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-emerald-500"></span> Tersedia</span>
                                     <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-[#ff750f]"></span> Dipilih</span>
                                     <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-neutral-300"></span> Terjual</span>
+                                    <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-red-500"></span> Rusak</span>
                                 </div>
                             </div>
                         </div>
@@ -488,6 +407,149 @@
             new MutationObserver(check).observe(form, { childList: true, subtree: true });
             check();
         });
+
+        const SEAT_FILLS = {
+            Sukian:    { AVAILABLE: { back: '#34D399', arm: '#059669' }, BLOCKED: { back: '#EF4444', arm: '#B91C1C' }, OCCUPIED: { back: '#D1D5DB', arm: '#9CA3AF' } },
+            SukianPlus:{ AVAILABLE: { back: '#60A5FA', arm: '#2563EB' }, BLOCKED: { back: '#EF4444', arm: '#B91C1C' }, OCCUPIED: { back: '#D1D5DB', arm: '#9CA3AF' } },
+            SukianPro: { AVAILABLE: { body: '#A78BFA', window: '#C4B5FD', mattress: '#C4B5FD' }, BLOCKED: { body: '#EF4444', window: '#FCA5A5', mattress: '#FCA5A5' }, OCCUPIED: { body: '#D1D5DB', window: '#C4C5C3', mattress: '#C4C5C3' } },
+        };
+
+        const tripId = '{{ $trip->id }}';
+        const seatStatusesUrl = '/perjalanan/' + tripId + '/seat-statuses';
+        let lastStatuses = @json($seatStatuses);
+
+        function getAlpineSeatMap() {
+            // Try global reference first (set by seatMap component init)
+            if (window.seatMapData) return window.seatMapData;
+            // Fallback: find the seat-map x-data element
+            const el = document.querySelector('.customer-seat')?.closest('[x-data]');
+            if (el && el._x_dataStack) {
+                return el._x_dataStack[0];
+            }
+            return null;
+        }
+
+        function pollSeatStatuses() {
+            fetch(seatStatusesUrl, { headers: { 'Accept': 'application/json' } })
+                .then(r => r.json())
+                .then(data => {
+                    const newStatuses = data.statuses;
+                    let changed = false;
+                    const alpine = getAlpineSeatMap();
+
+                    for (const [seatCode, newStatus] of Object.entries(newStatuses)) {
+                        const oldStatus = lastStatuses[seatCode];
+                        if (oldStatus && oldStatus !== newStatus) {
+                            changed = true;
+
+                            // Update Alpine data
+                            if (alpine) {
+                                if (newStatus === 'BLOCKED') {
+                                    if (!alpine.blocked.includes(seatCode)) alpine.blocked.push(seatCode);
+                                    alpine.occupied = alpine.occupied.filter(s => s !== seatCode);
+                                    alpine.selected = alpine.selected.filter(s => s !== seatCode);
+                                } else if (['SOLD', 'HELD'].includes(newStatus)) {
+                                    if (!alpine.occupied.includes(seatCode)) alpine.occupied.push(seatCode);
+                                    alpine.blocked = alpine.blocked.filter(s => s !== seatCode);
+                                    alpine.selected = alpine.selected.filter(s => s !== seatCode);
+                                } else if (newStatus === 'AVAILABLE') {
+                                    alpine.occupied = alpine.occupied.filter(s => s !== seatCode);
+                                    alpine.blocked = alpine.blocked.filter(s => s !== seatCode);
+                                }
+                            }
+
+                            // Also update DOM directly for immediate visual
+                            updateCustomerSeat(seatCode, newStatus);
+                        }
+                    }
+
+                    if (changed) {
+                        lastStatuses = newStatuses;
+                    }
+                })
+                .catch(() => {});
+        }
+
+        function updateCustomerSeat(seatCode, newStatus) {
+            const btn = document.querySelector('.customer-seat[data-seat="' + seatCode + '"]');
+            if (!btn) return;
+
+            const className = btn.dataset.class;
+            const isSleeper = className === 'SukianPro';
+            const isOccupied = ['SOLD', 'HELD'].includes(newStatus);
+            const isBlocked = newStatus === 'BLOCKED';
+
+            btn.dataset.status = newStatus;
+
+            // Update classes
+            btn.classList.remove('seat-icon--sukian', 'seat-icon--sukianplus', 'seat-icon--sukianpro', 'seat-icon--occupied', 'seat-icon--blocked', 'seat-icon--selected');
+            if (isBlocked) {
+                btn.classList.add('seat-icon--blocked');
+            } else if (isOccupied) {
+                btn.classList.add('seat-icon--occupied');
+            } else {
+                btn.classList.add('seat-icon--' + className.toLowerCase());
+            }
+
+            btn.disabled = isOccupied || isBlocked;
+
+            // Update SVG fills
+            const svg = btn.querySelector('svg');
+            if (!svg) return;
+
+            let fillState;
+            if (isBlocked) fillState = 'BLOCKED';
+            else if (isOccupied) fillState = 'OCCUPIED';
+            else fillState = 'AVAILABLE';
+
+            const fills = SEAT_FILLS[className] || SEAT_FILLS.Sukian;
+            const f = fills[fillState] || fills.AVAILABLE;
+
+            if (isSleeper) {
+                const rects = svg.querySelectorAll('rect');
+                rects[0].setAttribute('fill', f.body);
+                rects[1].setAttribute('fill', f.window);
+                rects[2].setAttribute('fill', f.mattress);
+            } else {
+                const rects = svg.querySelectorAll('rect');
+                if (rects.length >= 6) {
+                    rects[0].setAttribute('fill', f.back);
+                    rects[1].setAttribute('fill', f.back);
+                    rects[2].setAttribute('fill', f.arm);
+                    rects[3].setAttribute('fill', f.arm);
+                    rects[4].setAttribute('fill', f.arm);
+                    rects[5].setAttribute('fill', f.arm);
+                }
+            }
+
+            btn.title = isBlocked ? 'Kursi Dalam Perbaikan / Non-aktif' : className;
+            const labelSuffix = isBlocked ? ' (rusak)' : (isOccupied ? ' (terisi)' : '');
+            btn.setAttribute('aria-label', 'Kursi ' + seatCode + ' — ' + className + labelSuffix);
+
+            // Update seat label text
+            const label = btn.querySelector('.seat-label');
+            if (label) {
+                // Use Alpine's x-text if available, otherwise direct text
+                if (!label.getAttribute('x-text')) {
+                    label.textContent = isBlocked ? '⚠' : seatCode;
+                }
+            }
+
+            // Add/remove warning indicator SVG element for blocked
+            const existingWarning = btn.querySelector('.seat-warning-icon');
+            if (isBlocked && !existingWarning) {
+                const warn = document.createElement('span');
+                warn.className = 'seat-warning-icon';
+                warn.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor" class="h-3 w-3 text-white"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5z"/></svg>';
+                warn.style.cssText = 'position:absolute;top:2px;right:2px;display:flex;';
+                btn.style.position = 'relative';
+                btn.appendChild(warn);
+            } else if (!isBlocked && existingWarning) {
+                existingWarning.remove();
+            }
+        }
+
+        setInterval(pollSeatStatuses, 10000);
     </script>
     @endpush
 @endsection

@@ -7,11 +7,13 @@ use App\Enums\BusModelType;
 /**
  * Otoritas backend untuk peta kursi per model bus.
  *
- * v1 (didokumentasikan di docs/ARCHITECTURE.md §19):
- * - BIASANE: 40 kursi (10 baris A–J × 4 kolom). Baris A–B = SukianPlus (8),
- *   baris C–J = Sukian (32). Tanpa SukianPro.
- * - ANTIBU_SATSET: 30 kursi (10 baris A–J × 3 kolom). Baris A–C = SukianPro (9),
- *   baris D–F = SukianPlus (9), baris G–J = Sukian (12).
+ * PLETON: 40 kursi (10 baris A–J × 4 kolom, layout 2-2).
+ *   Baris A–B = SukianPlus (8), baris C–J = Sukian (32).
+ *
+ * KSATRIA: 30 kursi (mixed layout):
+ *   Baris A–D = SukianPro (8 pods, layout 1-1 sleeper).
+ *   Baris E–I = SukianPlus (10 kursi, layout 1-1 executive).
+ *   Baris J–L = Sukian (12 kursi, layout 2-2 standar).
  */
 class BusSeatTemplate
 {
@@ -22,7 +24,7 @@ class BusSeatTemplate
      */
     public static function allowedClasses(BusModelType $model): array
     {
-        return $model === BusModelType::BIASANE
+        return $model->resolve() === BusModelType::PLETON
             ? ['Sukian', 'SukianPlus']
             : ['Sukian', 'SukianPlus', 'SukianPro'];
     }
@@ -34,19 +36,23 @@ class BusSeatTemplate
      */
     public static function seats(BusModelType $model): array
     {
-        if ($model === BusModelType::BIASANE) {
+        $resolved = $model->resolve();
+
+        if ($resolved === BusModelType::PLETON) {
             return self::build(range('A', 'J'), [1, 2, 3, 4], fn (string $row) => in_array($row, ['A', 'B'], true)
                 ? 'SukianPlus'
                 : 'Sukian');
         }
 
-        return self::build(range('A', 'J'), [1, 2, 3], function (string $row): string {
-            if (in_array($row, ['A', 'B', 'C'], true)) {
-                return 'SukianPro';
-            }
-
-            return in_array($row, ['D', 'E', 'F'], true) ? 'SukianPlus' : 'Sukian';
-        });
+        // KSATRIA: mixed layout per section
+        return array_merge(
+            // Section 1: SukianPro (1-1 sleeper pods), Rows A–D
+            self::build(range('A', 'D'), [1, 2], fn (string $row) => 'SukianPro'),
+            // Section 2: SukianPlus (1-1 executive), Rows E–I
+            self::build(range('E', 'I'), [1, 2], fn (string $row) => 'SukianPlus'),
+            // Section 3: Sukian (2-2 standard), Rows J–L
+            self::build(range('J', 'L'), [1, 2, 3, 4], fn (string $row) => 'Sukian')
+        );
     }
 
     /**

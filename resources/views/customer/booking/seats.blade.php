@@ -17,11 +17,14 @@
                             <x-booking.seat-map
                                 :seats="$seats"
                                 :occupied="$occupied"
+                                :seatStatuses="$seatStatuses"
                                 :maxSeats="4"
                                 :busModel="$busModel"
                             />
                         </div>
                     </div>
+
+                    <x-booking.seat-legend :busModel="$busModel" />
                 </div>
 
                 <div class="lg:col-span-1">

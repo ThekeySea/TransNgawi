@@ -55,6 +55,7 @@
                                     <td class="px-6 py-3">{{ $trip->seats_count }} kursi</td>
                                     <td class="px-6 py-3">
                                         <div class="flex justify-end gap-2">
+                                            <a href="{{ route('admin.trips.seats', $trip) }}" class="btn-secondary px-3 py-1.5 text-xs" title="Live Seat Monitoring">Kursi</a>
                                             <a href="{{ route('admin.trips.edit', $trip) }}" class="btn-secondary px-3 py-1.5 text-xs">Ubah</a>
                                             <form method="POST" action="{{ route('admin.trips.destroy', $trip) }}" onsubmit="return confirm('Hapus trip ini? Kursi yang sudah terjual tidak akan terhapus.')">
                                                 @csrf

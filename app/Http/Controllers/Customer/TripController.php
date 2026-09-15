@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Trip;
 use App\Support\MockData;
+use Illuminate\Http\JsonResponse;
 
 class TripController extends Controller
 {
@@ -31,10 +32,15 @@ class TripController extends Controller
         $seats = $tripModel->seats->map(fn ($seat) => [
             'id' => $seat->seat_code,
             'class' => $seat->class_name,
+            'status' => $seat->status->value,
         ])->toArray();
 
+        $seatStatuses = $tripModel->seats->pluck('status', 'seat_code')
+            ->map(fn ($s) => is_string($s) ? $s : $s->value)
+            ->toArray();
+
         $occupied = $tripModel->seats
-            ->whereIn('status', ['SOLD', 'HELD', 'BLOCKED'])
+            ->whereIn('status', [\App\Enums\TripSeatStatus::SOLD, \App\Enums\TripSeatStatus::HELD])
             ->pluck('seat_code')
             ->toArray();
 
@@ -58,9 +64,19 @@ class TripController extends Controller
             'availability' => $availability,
             'seats' => $seats,
             'occupied' => $occupied,
+            'seatStatuses' => $seatStatuses,
             'busModel' => $busModel,
             'farePrices' => $farePrices,
             'duration' => $duration,
         ]);
+    }
+
+    public function seatStatuses(Trip $trip): JsonResponse
+    {
+        $statuses = $trip->seats->pluck('status', 'seat_code')
+            ->map(fn ($s) => is_string($s) ? $s : $s->value)
+            ->toArray();
+
+        return response()->json(['statuses' => $statuses]);
     }
 }
