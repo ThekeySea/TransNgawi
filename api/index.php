@@ -1,23 +1,40 @@
 <?php
 
-// 1. Paksa PHP menampilkan semua error fatal ke browser
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
+// 1. Buat direktori sementara di sistem Vercel (/tmp)
+$dirs = [
+    '/tmp/views',
+    '/tmp/cache',
+    '/tmp/sessions',
+    '/tmp/logs',
+];
 
-// 2. Buat folder sementara di sistem Vercel (/tmp)
-$dirs = ['/tmp/views', '/tmp/cache', '/tmp/sessions', '/tmp/logs'];
 foreach ($dirs as $dir) {
     if (!is_dir($dir)) {
         mkdir($dir, 0755, true);
     }
 }
 
-// 3. Paksa variabel lingkungan Laravel menggunakan folder /tmp
+// 2. Arahkan variabel cache Laravel ke /tmp
 putenv('VIEW_COMPILED_PATH=/tmp/views');
-putenv('SESSION_DRIVER=cookie');
-putenv('LOG_CHANNEL=stderr');
-putenv('CACHE_STORE=array');
+putenv('APP_SERVICES_CACHE=/tmp/cache/services.php');
+putenv('APP_PACKAGES_CACHE=/tmp/cache/packages.php');
+putenv('APP_CONFIG_CACHE=/tmp/cache/config.php');
+putenv('APP_ROUTES_CACHE=/tmp/cache/routes.php');
 
-// 4. Panggil berkas utama Laravel
-require __DIR__ . '/../public/index.php';
+// 3. Load Autoload & Bootstrapping Laravel
+require __DIR__ . '/../vendor/autoload.php';
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+
+// 4. Paksa Laravel memakai folder storage /tmp
+$app->useStoragePath('/tmp');
+
+// 5. Jalankan Aplikasi
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+
+$response = $kernel->handle(
+    $request = Illuminate\Http\Request::capture()
+);
+
+$response->send();
+
+$kernel->terminate($request, $response);
