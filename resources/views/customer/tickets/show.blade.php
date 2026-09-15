@@ -13,6 +13,21 @@
 
                 {{-- Ticket Card --}}
                 <div class="card overflow-hidden">
+                    {{-- Cancellation Warning Banner --}}
+                    @if ($booking->status === 'CANCELLED_BY_ADMIN')
+                        <div class="bg-red-600 px-6 py-4">
+                            <div class="flex items-start gap-3">
+                                <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
+                                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-white">Perjalanan Dibatalkan oleh Operator</p>
+                                    <p class="mt-1 text-xs text-red-100">Mohon maaf, perjalanan ini dibatalkan karena kendala operasional. Tiket Anda otomatis diproses untuk Pengembalian Dana (Refund 100%) sebesar Rp {{ number_format($booking->total, 0, ',', '.') }}.</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Header --}}
                     <div class="bg-brand px-6 py-4 text-white">
                         <div class="flex items-center justify-between">
@@ -21,8 +36,12 @@
                                 <p class="mt-1 text-lg font-bold">{{ $booking->code }}</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-xs font-semibold uppercase tracking-wider opacity-80">Kelas</p>
-                                <p class="mt-1 text-lg font-bold">{{ $booking->trip->bus->model_type->value }}</p>
+                                @if ($booking->status === 'CANCELLED_BY_ADMIN')
+                                    <span class="inline-flex items-center rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-bold text-white">DIBATALKAN (REFUND 100%)</span>
+                                @else
+                                    <p class="text-xs font-semibold uppercase tracking-wider opacity-80">Kelas</p>
+                                    <p class="mt-1 text-lg font-bold">{{ $booking->trip->bus->model_type->value }}</p>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -93,9 +112,15 @@
                             <div>
                                 <dt class="text-text-muted">Status Pembayaran</dt>
                                 <dd class="mt-1">
-                                    <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800">
-                                        Terkonfirmasi
-                                    </span>
+                                    @if ($booking->status === 'CANCELLED_BY_ADMIN')
+                                        <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800">
+                                            Dibatalkan (Refund 100%)
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800">
+                                            Terkonfirmasi
+                                        </span>
+                                    @endif
                                 </dd>
                             </div>
                             <div class="text-right">
@@ -107,9 +132,15 @@
 
                     {{-- Footer --}}
                     <div class="border-t border-border bg-surface px-6 py-4">
-                        <p class="text-center text-xs text-text-muted">
-                            Datang 30 menit sebelum keberangkatan. Tunjukkan tiket ini di loket boarding.
-                        </p>
+                        @if ($booking->status === 'CANCELLED_BY_ADMIN')
+                            <p class="text-center text-xs text-red-600 font-semibold">
+                                Perjalanan ini telah dibatalkan. Tiket tidak berlaku untuk boarding. Refund sedang diproses.
+                            </p>
+                        @else
+                            <p class="text-center text-xs text-text-muted">
+                                Datang 30 menit sebelum keberangkatan. Tunjukkan tiket ini di loket boarding.
+                            </p>
+                        @endif
                     </div>
                 </div>
 

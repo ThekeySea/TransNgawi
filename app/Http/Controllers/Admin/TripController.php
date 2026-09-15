@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\BusStatus;
 use App\Enums\TripSeatStatus;
+use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\TripUpdateRequest;
 use App\Models\Bus;
+use App\Models\Refund;
 use App\Models\Route;
 use App\Models\Trip;
 use App\Models\TripSeat;
@@ -22,8 +24,23 @@ class TripController extends Controller
 {
     public function index(): View
     {
+        $activeStatus = request('status', 'active');
+
         $query = Trip::with(['route.origin', 'route.destination', 'bus'])
             ->withCount(['fares', 'seats']);
+
+        // Status filtering
+        $query->when($activeStatus !== 'all', function ($q) use ($activeStatus) {
+            $statuses = match ($activeStatus) {
+                'active' => [TripStatus::SCHEDULED, TripStatus::IN_PROGRESS],
+                'completed' => [TripStatus::COMPLETED],
+                'cancelled' => [TripStatus::CANCELLED],
+                default => [],
+            };
+            if (! empty($statuses)) {
+                $q->whereIn('status', $statuses);
+            }
+        });
 
         if ($service = request('service')) {
             $query->whereHas('route', fn ($q) => $q->where('service_category', $service));
@@ -34,6 +51,7 @@ class TripController extends Controller
                 ->orderByDesc('created_at')
                 ->paginate(15),
             'activeService' => request('service'),
+            'activeStatus' => $activeStatus,
         ]);
     }
 
@@ -219,5 +237,122 @@ class TripController extends Controller
             'is_damaged' => $seat->is_damaged,
             'message' => "Kursi {$seat->seat_code} berhasil {$label}.",
         ]);
+    }
+
+    /**
+     * Mark trip as completed and revert bus to IDLE.
+     */
+    public function complete(Trip $trip): RedirectResponse
+    {
+        if ($trip->status === TripStatus::COMPLETED) {
+            return redirect()->route('admin.trips.index', ['status' => 'completed'])
+                ->with('error', 'Trip sudah dalam status selesai.');
+        }
+
+        if ($trip->status === TripStatus::CANCELLED) {
+            return redirect()->route('admin.trips.index', ['status' => 'cancelled'])
+                ->with('error', 'Trip yang dibatalkan tidak dapat diselesaikan.');
+        }
+
+        DB::transaction(function () use ($trip) {
+            $trip->update(['status' => TripStatus::COMPLETED]);
+
+            $bus = $trip->bus;
+            if ($bus && $bus->status !== BusStatus::MAINTENANCE) {
+                $hasOtherActiveTrips = Trip::where('bus_id', $bus->id)
+                    ->where('id', '!=', $trip->id)
+                    ->whereIn('status', [TripStatus::SCHEDULED, TripStatus::IN_PROGRESS])
+                    ->exists();
+
+                if (! $hasOtherActiveTrips) {
+                    $bus->update(['status' => BusStatus::IDLE]);
+                }
+            }
+        });
+
+        Log::info('Trip completed', [
+            'trip_id' => $trip->id,
+            'trip_code' => $trip->trip_code,
+            'bus_id' => $trip->bus_id,
+        ]);
+
+        return redirect()->route('admin.trips.index', ['status' => 'completed'])
+            ->with('status', "Trip {$trip->trip_code} berhasil diselesaikan.");
+    }
+
+    /**
+     * Cancel trip, refund all paid bookings 100%, and revert bus to IDLE.
+     */
+    public function cancel(Trip $trip): RedirectResponse
+    {
+        if ($trip->status === TripStatus::CANCELLED) {
+            return redirect()->route('admin.trips.index', ['status' => 'cancelled'])
+                ->with('error', 'Trip sudah dalam status dibatalkan.');
+        }
+
+        if ($trip->status === TripStatus::COMPLETED) {
+            return redirect()->route('admin.trips.index', ['status' => 'completed'])
+                ->with('error', 'Trip yang sudah selesai tidak dapat dibatalkan.');
+        }
+
+        DB::transaction(function () use ($trip) {
+            $trip->update(['status' => TripStatus::CANCELLED]);
+
+            // Find all paid/confirmed bookings for this trip
+            $paidBookings = $trip->bookings()
+                ->whereIn('status', ['CONFIRMED', 'WAITING_VERIFICATION'])
+                ->get();
+
+            foreach ($paidBookings as $booking) {
+                // Update booking status
+                $booking->update(['status' => 'CANCELLED_BY_ADMIN']);
+
+                // Create 100% refund record
+                Refund::create([
+                    'booking_id' => $booking->id,
+                    'trip_id' => $trip->id,
+                    'refund_amount' => $booking->total,
+                    'refund_percentage' => 100,
+                    'reason' => 'Pembatalan perjalanan oleh admin: ' . $trip->trip_code,
+                    'type' => 'TRIP_CANCELLATION',
+                ]);
+
+                // Release held seats
+                TripSeat::where('held_by_booking_id', $booking->id)
+                    ->whereIn('status', [TripSeatStatus::HELD, TripSeatStatus::SOLD])
+                    ->update([
+                        'status' => TripSeatStatus::AVAILABLE,
+                        'hold_expires_at' => null,
+                        'held_by_booking_id' => null,
+                    ]);
+            }
+
+            // Revert bus to IDLE (unless MAINTENANCE)
+            $bus = $trip->bus;
+            if ($bus && $bus->status !== BusStatus::MAINTENANCE) {
+                $hasOtherActiveTrips = Trip::where('bus_id', $bus->id)
+                    ->where('id', '!=', $trip->id)
+                    ->whereIn('status', [TripStatus::SCHEDULED, TripStatus::IN_PROGRESS])
+                    ->exists();
+
+                if (! $hasOtherActiveTrips) {
+                    $bus->update(['status' => BusStatus::IDLE]);
+                }
+            }
+        });
+
+        $refundCount = Refund::where('trip_id', $trip->id)
+            ->where('type', 'TRIP_CANCELLATION')
+            ->count();
+
+        Log::info('Trip cancelled with 100% refund', [
+            'trip_id' => $trip->id,
+            'trip_code' => $trip->trip_code,
+            'bus_id' => $trip->bus_id,
+            'refunds_created' => $refundCount,
+        ]);
+
+        return redirect()->route('admin.trips.index', ['status' => 'cancelled'])
+            ->with('status', "Trip {$trip->trip_code} dibatalkan. {$refundCount} refund 100% berhasil dibuat.");
     }
 }

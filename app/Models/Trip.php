@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\TripStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'trip_code', 'route_id', 'bus_id', 'departs_at', 'arrives_at',
+    'trip_code', 'route_id', 'bus_id', 'status', 'departs_at', 'arrives_at',
     'amenities', 'exterior_photos', 'interior_photos', 'facility_photos',
     'origin_stop_point_id', 'destination_stop_point_id',
     'origin_address', 'destination_address',
@@ -31,6 +32,7 @@ class Trip extends Model
             'exterior_photos' => 'array',
             'interior_photos' => 'array',
             'facility_photos' => 'array',
+            'status' => TripStatus::class,
         ];
     }
 
@@ -94,6 +96,22 @@ class Trip extends Model
     public function seats(): HasMany
     {
         return $this->hasMany(TripSeat::class);
+    }
+
+    /**
+     * Bookings for this trip.
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * Refunds generated from this trip.
+     */
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class);
     }
 
     /**

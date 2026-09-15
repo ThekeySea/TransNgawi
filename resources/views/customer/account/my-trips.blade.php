@@ -97,6 +97,7 @@
                 <div class="mb-6 flex gap-2">
                     <a href="{{ route('my-trips.index', ['tab' => 'upcoming']) }}" class="rounded-lg px-4 py-2 text-sm font-semibold transition-colors @if($tab === 'upcoming') bg-[#ff750f] text-white @else bg-[#e6e6e6] text-[#1a1a1a] hover:bg-[#d4d4d4] @endif">Mendatang</a>
                     <a href="{{ route('my-trips.index', ['tab' => 'past']) }}" class="rounded-lg px-4 py-2 text-sm font-semibold transition-colors @if($tab === 'past') bg-[#ff750f] text-white @else bg-[#e6e6e6] text-[#1a1a1a] hover:bg-[#d4d4d4] @endif">Selesai</a>
+                    <a href="{{ route('my-trips.index', ['tab' => 'cancelled']) }}" class="rounded-lg px-4 py-2 text-sm font-semibold transition-colors @if($tab === 'cancelled') bg-[#ff750f] text-white @else bg-[#e6e6e6] text-[#1a1a1a] hover:bg-[#d4d4d4] @endif">Dibatalkan</a>
                     <a href="{{ route('my-trips.index', ['tab' => 'all']) }}" class="rounded-lg px-4 py-2 text-sm font-semibold transition-colors @if($tab === 'all') bg-[#ff750f] text-white @else bg-[#e6e6e6] text-[#1a1a1a] hover:bg-[#d4d4d4] @endif">Semua</a>
                 </div>
 

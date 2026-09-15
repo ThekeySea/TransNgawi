@@ -1,58 +1,296 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# TransNgawi
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Platform tiket bus antarkota berbasis web. Dibangun dengan Laravel 13, Blade, Alpine.js, dan Tailwind CSS.
 
-## About Laravel
+> **Bold enough to be remembered, restrained enough to be trusted.**
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tujuan
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+TransNgawi menyediakan pengalaman pemesanan tiket bus yang nyaman, mudah, dan terjangkau untuk perjalanan antarkota. Platform ini terdiri dari dua sisi:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Customer-facing**: Pencarian trip, pemilihan kursi, pemesanan, pembayaran manual, e-ticket, pelacakan status
+- **Admin dashboard**: Manajemen armada, trip, transaksi, refund, analitik, dan dukungan pelanggan
 
-## Learning Laravel
+## Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Layer | Teknologi |
+|-------|-----------|
+| Backend | Laravel 13 (PHP 8.3+) |
+| Auth | Laravel Breeze (Blade + Alpine.js) |
+| Frontend | Blade Templates, Alpine.js 3.17, Tailwind CSS 3.4 |
+| Build | Vite 8 |
+| PDF | barryvdh/laravel-dompdf |
+| Barcode | picqer/php-barcode-generator |
+| Database | MySQL (testing: SQLite in-memory) |
+| Testing | PHPUnit 12 |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Akun Default
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@transngawi.com` | `password` |
+| User | `user@transngawi.com` | `password` |
 
-## Agentic Development
+## Cara Testing
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### Menjalankan Aplikasi
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+npm install
+php artisan migrate
+php artisan db:seed
+php artisan key:generate
+npm run dev
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Buka `http://localhost:8000` (atau port lain sesuai konfigurasi Laragon).
 
-## Contributing
+### Menjalankan Semua Test
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+php artisan test
+```
 
-## Code of Conduct
+### Menjalankan Test Tertentu
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php artisan test --filter=AdminManagementTest
+php artisan test --filter=SearchTest
+php artisan test --filter=ProfileTest
+```
 
-## Security Vulnerabilities
+### Build Produksi
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+npm run build
+```
 
-## License
+### Clear Cache
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan view:clear
+php artisan cache:clear
+php artisan config:clear
+```
+
+---
+
+## Halaman & Fitur
+
+### Customer-Facing
+
+| Halaman | URL | Deskripsi |
+|---------|-----|-----------|
+| **Beranda** | `/` | Hero, widget booking cepat, informasi penting, about CTA |
+| **Pencarian** | `/search` | Filter rute, layanan, tanggal, urutan (harga/waktu) |
+| **Detail Trip** | `/perjalanan/{id}` | Info bus, foto, fasilitas, peta kursi real-time, harga |
+| **Pemilihan Kursi** | `/trips/{id}/seats` | Pilih kursi (max 4), countdown 15 menit |
+| **Data Penumpang** | `/booking/{id}/passengers` | Isi nama, email, telepon |
+| **Review** | `/booking/{id}/review` | Ringkasan sebelum bayar |
+| **Pembayaran** | `/booking/{id}/payment` | Upload bukti bayar (manual) |
+| **Status Bayar** | `/booking/{id}/payment-status` | Status verifikasi |
+| **Lacak Tiket** | `/track` | Cari booking dengan kode + telepon/email |
+| **Detail Tiket** | `/track/{code}` | Status booking, info perjalanan, aksi |
+| **E-Ticket** | `/tickets/{code}` | Tiket digital dengan barcode |
+| **Invoice** | `/booking/{code}/invoice` | Invoice PDF dan gambar |
+| **Tiket Saya** | `/my-trips` | Tab Mendatang, Selesai, Dibatalkan, Semua |
+| **Profil** | `/profile` | Update info akun, foto, password |
+| **Kelas** | `/classes` | Informasi kelas bus (Sukian, SukianPlus, SukianPro) |
+| **Rute** | `/routes` | Peta jaringan rute SVG |
+| **Tentang** | `/about` | Bento grid keunggulan, cerita TransNgawi |
+| **Bantuan** | `/help` | Sesi dukungan pelanggan |
+
+### Admin Dashboard
+
+| Halaman | URL | Deskripsi |
+|---------|-----|-----------|
+| **Beranda** | `/admin` | Dashboard notifikasi |
+| **Lokasi** | `/admin/locations` | CRUD lokasi + titik naik/turun |
+| **Armada** | `/admin/buses` | CRUD bus, status (IDLE/AKTIF/PERAWATAN) |
+| **Issue Armada** | `/admin/buses/{id}/issues` | Pelaporan & tracking masalah bus |
+| **Rute** | `/admin/routes` | CRUD rute dengan validasi layanan |
+| **Trip** | `/admin/trips` | Filter Aktif/Selesai/Dibatalkan/Semua |
+| **Wizard Trip** | `/admin/trips/create/{step}` | 5 langkah: Layanan → Rute → Bus/Waktu → Harga → Detail |
+| **Edit Trip** | `/admin/trips/{id}/edit` | Ubah jadwal, bus, harga |
+| **Monitoring Kursi** | `/admin/trips/{id}/seats` | Live seat map + toggle maintenance |
+| **Selesai/Batalkan Trip** | PATCH `/admin/trips/{id}/complete` atau `/cancel` | Status trip + refund otomatis |
+| **Transaksi** | `/admin/transactions` | Daftar booking, approve/reject pembayaran |
+| **Refund** | `/admin/refunds` | Daftar refund (pembatalan armada/penumpang) |
+| **Analitik** | `/admin/analisa` | Pendapatan per periode |
+| **Bantuan** | `/admin/help` | Kelola sesi dukungan pelanggan |
+
+---
+
+## MVP Role & Scope
+
+### Layanan (Service Category)
+
+| kode | Nama | Deskripsi |
+|------|------|-----------|
+| `ANTIBU` | Antar Ibu Kota | Rute antar ibu kota. Kedua ujung harus kota ibu kota. |
+| `SATSET` | Antar Tempat Penting | Rute tempat penting. Kedua ujung harus titik penting. |
+| `BIASANE` | Perjalanan Reguler | Rute reguler tanpa batasan lokasi. |
+
+### Kelas Travel
+
+| Kelas | Deskripsi | Layout |
+|-------|-----------|--------|
+| **Sukian** | Standar | 2-2 (4 kolom) |
+| **SukianPlus** | Eksekutif | 1-1 (2 kolom, kursi lebih lebar) |
+| **SukianPro** | Sleeper Pod | 1-1 (2 kolom, pod kapsul) |
+
+### Model Bus
+
+| Model | Kursi | Layout |
+|-------|-------|--------|
+| **PLETON** | 40 | SukianPlus (8) + Sukian (32) |
+| **KSATRIA** | 30 | SukianPro (8) + SukianPlus (10) + Sukian (12) |
+
+### Alur Booking
+
+1. **Pilih Kursi** → Kursi ditahan 15 menit (status: HELD)
+2. **Isi Data Penumpang** → Nama, email, telepon
+3. **Review** → Ringkasan pesanan
+4. **Bayar** → Upload bukti pembayaran (manual)
+5. **Verifikasi** → Admin approve/reject
+6. **Selesai** → Status CONFIRMED, e-ticket aktif
+
+### Alur Pembatalan
+
+- **Oleh Admin (Trip)**: Semua booking di trip → `CANCELLED_BY_ADMIN` → Refund 100% otomatis → Kursi dilepas
+- **Oleh Penumpang (Booking)**: Booking individual → `CANCELLED` → Refund 100% → Kursi dilepas
+
+### Status Booking
+
+| Status | Deskripsi |
+|--------|-----------|
+| `PENDING` | Baru dibuat |
+| `HELD` | Kursi ditahan (15 menit) |
+| `WAITING_VERIFICATION` | Menunggu verifikasi admin |
+| `CONFIRMED` | Pembayaran terverifikasi |
+| `REJECTED` | Pembayaran ditolak |
+| `EXPIRED` | Hold kedaluwarsa |
+| `CANCELLED` | Dibatalkan oleh penumpang |
+| `CANCELLED_BY_ADMIN` | Dibatalkan oleh admin (trip dibatalkan) |
+
+### Status Trip
+
+| Status | Deskripsi |
+|--------|-----------|
+| `SCHEDULED` | Terjadwal |
+| `IN_PROGRESS` | Berlangsung |
+| `COMPLETED` | Selesai |
+| `CANCELLED` | Dibatalkan |
+
+### Status Bus
+
+| Status | Deskripsi |
+|--------|-----------|
+| `IDLE` | Tersedia |
+| `ACTIVE` | Sedang dalam trip |
+| `MAINTENANCE` | Dalam perawatan |
+
+### Format Kode
+
+- **Trip Code**: `TRIP-YYYYMMDD-XXXX` (contoh: TRIP-20260914-X89A) — auto-generate, immutable
+- **Booking Code**: `TN` + 6 hex (contoh: TNX8F29) — auto-generate
+
+---
+
+## Database
+
+27 tabel, 15 model, 7 enum.
+
+### Model Utama
+
+```
+User ─┬─ Booking ──── BookingSeat ──── TripSeat
+      │                      │
+      │                      └── Refund
+      │
+      └── SupportSession ──── SupportMessage
+
+Location ──── Route ──── Trip ──── TripFare
+                  │                 TripSeat
+                  │
+Bus ──── BusIssue ──── MaintenanceRecord
+```
+
+---
+
+## Arsitektur
+
+```
+TransNgawi/
+├── app/
+│   ├── Enums/           # 7 enum (ServiceCategory, BusModelType, TripStatus, dll)
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Admin/   # 11 controller admin
+│   │   │   └── Customer/# 12 controller customer
+│   │   └── Middleware/   # EnsureUserIsAdmin
+│   ├── Models/          # 15 model
+│   ├── Services/        # BookingService, TripCreationService
+│   └── Support/         # BusSeatTemplate, MockData
+├── database/
+│   ├── migrations/      # 27 migration
+│   └── seeders/         # DatabaseSeeder, TripSeeder
+├── resources/
+│   └── views/           # ~90 blade templates
+│       ├── admin/       # Admin dashboard views
+│       ├── customer/    # Customer-facing views
+│       ├── components/  # Reusable components
+│       └── layouts/     # Admin & customer layouts
+├── routes/
+│   ├── web.php          # Semua route utama
+│   └── auth.php         # Route autentikasi Breeze
+└── tests/
+    └── Feature/         # 13 test file, 103 test case
+```
+
+---
+
+## Konfigurasi Penting
+
+### Tailwind Brand Color
+
+Gunakan `bg-[#ff750f]` / `text-[#ff750f]` — brand color `#ff750f` belum didefinisikan di `tailwind.config.js`.
+
+### `js()` Helper
+
+Helper `js()` tidak tersedia. Gunakan `json_encode()` atau `@js()` Blade directive.
+
+### Enum to String
+
+`$trip->seats->pluck('status', 'seat_code')` mengembalikan enum objects. Chain `->map(fn ($s) => is_string($s) ? $s : $s->value)` sebelum `toArray()`.
+
+### Pembayaran
+
+TransNgawi **tidak** menggunakan payment gateway. Pembayaran bersifat manual/simulated dengan verifikasi admin.
+
+---
+
+## Test Coverage
+
+| Kategori | Test | Assertions |
+|----------|------|------------|
+| Admin Management | 50+ | 200+ |
+| Search | 10+ | 40+ |
+| Auth | 20+ | 60+ |
+| Profile | 5 | 20+ |
+| Domain Relationships | 8 | 30+ |
+| **Total** | **103** | **383** |
+
+### Yang Diuji
+
+- Akses kontrol (guest, non-admin, admin)
+- CRUD lokasi, bus, rute
+- Wizard trip 5 langkah
+- Validasi rute berdasarkan layanan
+- Lifecycle status bus (IDLE → ACTIVE → IDLE)
+- Toggle kursi maintenance (BLOCKED ↔ AVAILABLE)
+- Auto-generate kode trip
+- Invoice view & PDF download
+- Autentikasi email & username
+- Registrasi, reset password, verifikasi email

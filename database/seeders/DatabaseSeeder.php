@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@transngawi.com'],
             [
                 'name' => 'Administrator TransNgawi',
+                'username' => 'admin',
                 'password' => bcrypt('password'),
                 'role' => 'admin',
             ]
@@ -30,6 +31,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'user@transngawi.com'],
             [
                 'name' => 'Pelanggan TransNgawi',
+                'username' => 'user',
                 'password' => bcrypt('password'),
                 'role' => 'user',
             ]

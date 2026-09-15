@@ -54,6 +54,7 @@ Route::get('/track', [TrackController::class, 'index'])->name('track.index');
 Route::post('/track', [TrackController::class, 'lookup'])->name('track.lookup');
 Route::get('/track/{code}', [TrackController::class, 'show'])->name('track.show');
 Route::post('/track/{code}/payment', [TrackController::class, 'updatePayment'])->name('track.update-payment');
+Route::post('/track/{code}/cancel', [TrackController::class, 'cancelBooking'])->name('track.cancel');
 
 Route::get('/tickets/{code}', [TicketController::class, 'show'])->name('tickets.show');
 
@@ -115,6 +116,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::put('/trips/{trip}', [AdminTripController::class, 'update'])->name('trips.update');
     Route::delete('/trips/{trip}', [AdminTripController::class, 'destroy'])->name('trips.destroy');
     Route::get('/trips/{trip}/seats', [AdminTripController::class, 'seats'])->name('trips.seats');
+    Route::patch('/trips/{trip}/complete', [AdminTripController::class, 'complete'])->name('trips.complete');
+    Route::patch('/trips/{trip}/cancel', [AdminTripController::class, 'cancel'])->name('trips.cancel');
     Route::patch('/trip-seats/{seat}/toggle-maintenance', [AdminTripSeatController::class, 'toggleMaintenance'])->name('trip-seats.toggle');
 
     // Analisa
@@ -125,6 +128,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/transactions/{booking}', [AdminTransactionController::class, 'show'])->name('transactions.show');
     Route::post('/transactions/{booking}/approve', [AdminTransactionController::class, 'approve'])->name('transactions.approve');
     Route::post('/transactions/{booking}/reject', [AdminTransactionController::class, 'reject'])->name('transactions.reject');
+
+    // Refunds
+    Route::get('/refunds', [AdminTransactionController::class, 'refunds'])->name('refunds.index');
 
     // Help
     Route::get('/help', [AdminHelpController::class, 'index'])->name('help.index');

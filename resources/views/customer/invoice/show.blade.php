@@ -167,6 +167,36 @@
             margin-left: 12px;
             letter-spacing: 0.5px;
         }
+        .cancelled-badge {
+            display: inline-block;
+            background: #dc2626;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 4px;
+            margin-left: 12px;
+            letter-spacing: 0.5px;
+        }
+        .refund-banner {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-left: 4px solid #dc2626;
+            padding: 14px 18px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+        }
+        .refund-banner h4 {
+            font-size: 13px;
+            font-weight: 800;
+            color: #dc2626;
+            margin-bottom: 4px;
+        }
+        .refund-banner p {
+            font-size: 12px;
+            color: #7f1d1d;
+            line-height: 1.5;
+        }
         .passenger-section {
             margin-bottom: 24px;
         }
@@ -219,6 +249,14 @@
         <div class="barcode">
             <img src="data:image/png;base64,{{ $barcodeBase64 }}" alt="Barcode {{ $booking->code }}">
         </div>
+
+        {{-- Refund Banner --}}
+        @if (in_array($booking->status, ['CANCELLED', 'CANCELLED_BY_ADMIN']))
+            <div class="refund-banner">
+                <h4>Pembatalan Perjalanan &mdash; Refund 100%</h4>
+                <p>Perjalanan ini telah dibatalkan oleh admin. Seluruh biaya tiket sebesar <strong>Rp {{ number_format($booking->total, 0, ',', '.') }}</strong> akan direfund 100% dalam waktu 1-3 hari kerja ke rekening Anda.</p>
+            </div>
+        @endif
 
         {{-- Info Grid --}}
         <div class="info-grid">
@@ -314,15 +352,23 @@
                 <div class="total-label">Total Terbayar</div>
                 <div>
                     <span class="total-amount">Rp {{ number_format($booking->total, 0, ',', '.') }}</span>
-                    <span class="paid-badge">LUNAS</span>
+        @if (in_array($booking->status, ['CANCELLED', 'CANCELLED_BY_ADMIN']))
+                        <span class="cancelled-badge">DIREFUND</span>
+                    @else
+                        <span class="paid-badge">LUNAS</span>
+                    @endif
                 </div>
             </div>
         </div>
 
         {{-- Footer --}}
         <div class="footer">
-            <p>Invoice ini sah dan dikeluarkan oleh sistem TransNgawi.</p>
-            <p>Simpan tiket ini dan tunjukkan saat boarding. Terima kasih telah memilih TransNgawi.</p>
+        @if (in_array($booking->status, ['CANCELLED', 'CANCELLED_BY_ADMIN']))
+                <p>Perjalanan ini telah dibatalkan. Refund sedang diproses. Hubungi admin jika ada pertanyaan.</p>
+            @else
+                <p>Invoice ini sah dan dikeluarkan oleh sistem TransNgawi.</p>
+                <p>Simpan tiket ini dan tunjukkan saat boarding. Terima kasih telah memilih TransNgawi.</p>
+            @endif
         </div>
     </div>
 </body>

@@ -12,6 +12,7 @@ use App\Enums\BusModelType;
 use App\Support\BusSeatTemplate;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class TripSeeder extends Seeder
 {
@@ -45,10 +46,12 @@ class TripSeeder extends Seeder
     private function createTrip(Route $route, Bus $bus, Carbon $departs, Carbon $arrives): void
     {
         $trip = Trip::create([
-            'route_id' => $route->id,
-            'bus_id' => $bus->id,
+            'trip_code'  => 'TRP-' . strtoupper(Str::random(6)),
+            'route_id'   => $route->id,
+            'bus_id'     => $bus->id,
             'departs_at' => $departs,
             'arrives_at' => $arrives,
+            'status'     => 'SCHEDULED',
         ]);
 
         $templateSeats = BusSeatTemplate::seats($bus->model_type);

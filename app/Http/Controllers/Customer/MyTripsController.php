@@ -25,14 +25,23 @@ class MyTripsController extends Controller
 
         $query = Booking::with(['trip.route.origin', 'trip.route.destination', 'trip.bus', 'seats'])
             ->where('bookings.user_id', $user->id)
-            ->whereIn('bookings.status', ['CONFIRMED', 'WAITING_VERIFICATION'])
             ->join('trips', 'bookings.trip_id', '=', 'trips.id')
             ->select('bookings.*');
 
-        if ($tab === 'upcoming') {
-            $query->where('trips.departs_at', '>=', now());
-        } elseif ($tab === 'past') {
-            $query->where('trips.departs_at', '<', now());
+        if ($tab === 'cancelled') {
+            $query->where('bookings.status', 'CANCELLED_BY_ADMIN');
+        } else {
+            $query->whereIn('bookings.status', ['CONFIRMED', 'WAITING_VERIFICATION']);
+
+            if ($tab === 'upcoming') {
+                $query->where('trips.departs_at', '>=', now())
+                    ->where('trips.status', '!=', 'COMPLETED');
+            } elseif ($tab === 'past') {
+                $query->where(function ($q) {
+                    $q->where('trips.departs_at', '<', now())
+                        ->orWhere('trips.status', 'COMPLETED');
+                });
+            }
         }
 
         $bookings = $query->orderByDesc('trips.departs_at')->get();

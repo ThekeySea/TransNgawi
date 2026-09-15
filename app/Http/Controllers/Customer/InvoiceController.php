@@ -21,7 +21,7 @@ class InvoiceController extends Controller
             ->where('code', $code)
             ->first();
 
-        if (! $booking || $booking->status !== 'CONFIRMED') {
+        if (! $booking || ! in_array($booking->status, ['CONFIRMED', 'CANCELLED', 'CANCELLED_BY_ADMIN'])) {
             abort(404);
         }
 

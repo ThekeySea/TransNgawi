@@ -19,6 +19,25 @@
             <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
                 {{-- Main Content --}}
                 <div class="lg:col-span-2 space-y-6">
+                    {{-- Cancellation Warning Banner --}}
+                    @if ($booking->status === 'CANCELLED_BY_ADMIN')
+                        <div class="rounded-[var(--radius-sm)] bg-red-600 p-5 text-white">
+                            <div class="flex items-start gap-4">
+                                <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
+                                    <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                </div>
+                                <div>
+                                    <p class="text-base font-bold">Perjalanan Dibatalkan oleh Operator</p>
+                                    <p class="mt-1 text-sm text-red-100">Mohon maaf, perjalanan ini dibatalkan karena kendala operasional. Tiket Anda otomatis diproses untuk Pengembalian Dana (Refund 100%) sebesar <strong class="text-white">Rp {{ number_format($booking->total, 0, ',', '.') }}</strong>.</p>
+                                    <div class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-bold">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                                        DIBATALKAN (REFUND 100%)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Status Banner --}}
                     <div class="card">
                         <div class="card-body">
@@ -29,7 +48,8 @@
                                         'WAITING_VERIFICATION' => ['bg' => 'bg-amber-50', 'border' => 'border-amber-200', 'icon' => 'text-amber-600', 'label' => 'Menunggu Verifikasi', 'desc' => 'Pembayaran Anda sedang diverifikasi oleh admin.'],
                                         'HELD' => ['bg' => 'bg-blue-50', 'border' => 'border-blue-200', 'icon' => 'text-blue-600', 'label' => 'Ditahan', 'desc' => 'Kursi Anda ditahan. Selesaikan pembayaran sebelum waktu habis.'],
                                         'EXPIRED' => ['bg' => 'bg-red-50', 'border' => 'border-red-200', 'icon' => 'text-red-600', 'label' => 'Kadaluarsa', 'desc' => 'Pemesanan telah kedaluwarsa.'],
-                                        'CANCELLED' => ['bg' => 'bg-red-50', 'border' => 'border-red-200', 'icon' => 'text-red-600', 'label' => 'Dibatalkan', 'desc' => 'Pemesanan telah dibatalkan.'],
+                                        'CANCELLED' => ['bg' => 'bg-red-50', 'border' => 'border-red-200', 'icon' => 'text-red-600', 'label' => 'Dibatalkan (Refund 100%)', 'desc' => 'Anda telah membatalkan tiket ini. Pengembalian dana 100% akan diproses dalam 1-3 hari kerja.'],
+                                        'CANCELLED_BY_ADMIN' => ['bg' => 'bg-red-50', 'border' => 'border-red-200', 'icon' => 'text-red-600', 'label' => 'Dibatalkan (Perjalanan Dibatalkan)', 'desc' => 'Perjalanan dibatalkan oleh admin. Seluruh pembayaran akan direfund 100%.'],
                                         default => ['bg' => 'bg-neutral-50', 'border' => 'border-neutral-200', 'icon' => 'text-neutral-600', 'label' => $booking->status, 'desc' => ''],
                                     };
                                 @endphp
@@ -40,6 +60,10 @@
                                         <svg class="h-6 w-6 {{ $statusConfig['icon'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     @elseif ($booking->status === 'HELD')
                                         <svg class="h-6 w-6 {{ $statusConfig['icon'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    @elseif ($booking->status === 'CANCELLED')
+                                        <svg class="h-6 w-6 {{ $statusConfig['icon'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                                    @elseif ($booking->status === 'CANCELLED_BY_ADMIN')
+                                        <svg class="h-6 w-6 {{ $statusConfig['icon'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
                                     @else
                                         <svg class="h-6 w-6 {{ $statusConfig['icon'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                     @endif
@@ -148,6 +172,29 @@
                                 <a href="{{ route('tickets.show', $booking->code) }}" class="btn-primary mt-4 w-full">
                                     Lihat E-Ticket
                                 </a>
+                                <form method="POST" action="{{ route('track.cancel', $booking->code) }}" onsubmit="return confirm('Batalkan tiket ini? Pengembalian dana 100% akan diproses dalam 1-3 hari kerja.')" class="mt-3">
+                                    @csrf
+                                    <button type="submit" class="inline-flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-sm)] border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 transition-all hover:bg-red-50">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        Batal Tiket
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if ($booking->status === 'CANCELLED_BY_ADMIN')
+                                <a href="{{ route('invoice.view', $booking->code) }}" class="btn-secondary mt-4 w-full">
+                                    Lihat Invoice (Refund)
+                                </a>
+                            @endif
+
+                            @if (in_array($booking->status, ['WAITING_VERIFICATION', 'HELD']))
+                                <form method="POST" action="{{ route('track.cancel', $booking->code) }}" onsubmit="return confirm('Batalkan tiket ini? Pengembalian dana 100% akan diproses dalam 1-3 hari kerja.')" class="mt-3">
+                                    @csrf
+                                    <button type="submit" class="inline-flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-sm)] border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 transition-all hover:bg-red-50">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        Batal Tiket
+                                    </button>
+                                </form>
                             @endif
 
                             <div class="mt-6 border-t border-border pt-4">

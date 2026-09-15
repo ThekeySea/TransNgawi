@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\TripSeatStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Refund;
 use App\Models\TripSeat;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
@@ -67,5 +68,24 @@ class TransactionController extends Controller
 
         return redirect()->route('admin.transactions.show', $booking)
             ->with('status', "Pembayaran {$booking->code} telah ditolak.");
+    }
+
+    /**
+     * Display all refunds (especially trip cancellation refunds).
+     */
+    public function refunds(Request $request)
+    {
+        $query = Refund::with(['booking.trip.route.origin', 'booking.trip.route.destination', 'trip']);
+
+        if ($type = $request->input('type')) {
+            $query->where('type', $type);
+        }
+
+        $refunds = $query->latest()->paginate(15)->withQueryString();
+
+        return view('admin.refunds.index', [
+            'refunds' => $refunds,
+            'activeType' => $type,
+        ]);
     }
 }
